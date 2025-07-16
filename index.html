@@ -267,7 +267,6 @@
                 const statusElem = document.getElementById('upload-status');
                 const uploadLabel = document.getElementById('upload-label');
                 
-                // New elements for API Key prompt
                 const apiKeyPrompt = document.getElementById('api-key-prompt');
                 const apiKeyInput = document.getElementById('imgbb-api-key-input');
                 const saveApiKeyBtn = document.getElementById('save-api-key-btn');
@@ -379,6 +378,20 @@
                 closeSettingsBtn.addEventListener('click', () => settingsMenu.classList.remove('visible'));
                 settingsMenu.addEventListener('click', (e) => { if (e.target === settingsMenu) settingsMenu.classList.remove('visible'); });
                 
+                // NEW: Helper function to update media session artwork
+                function updateMediaSessionArt() {
+                    if ('mediaSession' in navigator && window.radioPlayer && window.radioPlayer.currentStationIndex !== -1) {
+                        const station = window.radioPlayer.stations[window.radioPlayer.currentStationIndex];
+                        navigator.mediaSession.metadata = new MediaMetadata({
+                            title: station.name,
+                            artist: station.genre,
+                            artwork: [
+                                { src: currentWallpaperImg.src }
+                            ]
+                        });
+                    }
+                }
+
                 (function setupWidgets() {
                     const noteWidget = document.getElementById('note-widget');
                     const noteDisplay = document.getElementById('note-display');
@@ -506,12 +519,8 @@
                             this.audio.src = station.streamUrl;
                             this.audio.play().catch(e => console.error("Audio play failed:", e));
 
-                            if ('mediaSession' in navigator) {
-                                navigator.mediaSession.metadata = new MediaMetadata({
-                                    title: station.name,
-                                    artist: station.genre,
-                                });
-                            }
+                            // MODIFIED: Use the helper function to set media metadata
+                            updateMediaSessionArt();
                         },
                         openRadioMenu() {
                             this.elements.radioChannelList.innerHTML = '';
@@ -759,7 +768,14 @@
                 
                 const getWps = () => JSON.parse(localStorage.getItem('lockscreenWallpapers_v2')) || [initialWallpaper];
                 const saveWps = (wps) => localStorage.setItem('lockscreenWallpapers_v2', JSON.stringify(wps));
-                const setWp = (wpObj) => { exitPanningMode(); lockScreen.style.backgroundImage = `url('${wpObj.url}')`; lockScreen.style.backgroundPosition = wpObj.position || 'center center'; currentWallpaperImg.src = wpObj.url; };
+                const setWp = (wpObj) => { 
+                    exitPanningMode(); 
+                    lockScreen.style.backgroundImage = `url('${wpObj.url}')`; 
+                    lockScreen.style.backgroundPosition = wpObj.position || 'center center'; 
+                    currentWallpaperImg.src = wpObj.url; 
+                    // MODIFIED: Update media session when wallpaper changes
+                    updateMediaSessionArt();
+                };
                 const renderWpChoices = () => { const cont = document.getElementById('wallpaper-choices'); cont.innerHTML = ''; getWps().forEach(wp => { const thumb = document.createElement('div'); thumb.className = 'wallpaper-thumbnail'; thumb.style.backgroundImage = `url('${wp.url}')`; const rmvBtn = document.createElement('span'); rmvBtn.className = 'remove-thumb-btn'; rmvBtn.innerHTML = '×'; rmvBtn.title = 'Remove wallpaper'; rmvBtn.addEventListener('click', (e) => { e.stopPropagation(); const newWps = getWps().filter(w => w.url !== wp.url); saveWps(newWps); renderWpChoices(); }); thumb.appendChild(rmvBtn); thumb.addEventListener('click', () => { setWp(wp); localStorage.setItem('lockscreenLastSelectedWp', wp.url); settingsMenu.classList.remove('visible'); }); cont.appendChild(thumb); }); };
                 document.getElementById('wallpaper-url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const url = e.target.value.trim(); if(url.toLowerCase().endsWith('.gif')) { alert('Please use the GIF widget to add GIFs.'); e.target.value = ''; return; } if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) { const wps = getWps(); if (!wps.some(w => w.url === url)) { const newWp = { url: url, position: 'center center' }; wps.push(newWp); saveWps(wps); setWp(newWp); localStorage.setItem('lockscreenLastSelectedWp', newWp.url); renderWpChoices(); } e.target.value = ''; settingsMenu.classList.remove('visible'); } else { alert('Invalid URL.'); } } });
                 function exitPanningMode() { if (!isPanningMode) return; isPanningMode = false; lockScreen.classList.remove('panning-active'); const url = currentWallpaperImg.src; const wps = getWps(); const idx = wps.findIndex(w => w.url === url); if (idx > -1) { wps[idx].position = lockScreen.style.backgroundPosition; saveWps(wps); } }
