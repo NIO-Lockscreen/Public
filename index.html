@@ -245,7 +245,8 @@
             const clock = document.getElementById('clock');
             const qrModal = document.getElementById('qr-modal');
             const initialWallpaper = { url: 'https://images.pexels.com/photos/807598/pexels-photo-807598.jpeg', position: 'center center' };
-            let isPanningMode = false, currentWallpaperImg = new Image(), pollingInterval, clickTimer, inactivityTimer, pressHoldTimer;
+            // CORRECTED: Added a dedicated variable for the current wallpaper URL
+            let isPanningMode = false, currentWallpaperImg = new Image(), currentWallpaperUrl = '', pollingInterval, clickTimer, inactivityTimer, pressHoldTimer;
             let hasMovedWp = false;
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -375,16 +376,14 @@
                 closeSettingsBtn.addEventListener('click', () => settingsMenu.classList.remove('visible'));
                 settingsMenu.addEventListener('click', (e) => { if (e.target === settingsMenu) settingsMenu.classList.remove('visible'); });
                 
-                // CORRECTED: Helper function to update media session artwork
-                function updateMediaSessionArt(artUrl) {
-                    // Use the provided artUrl, or fall back to the global current wallpaper image source
-                    const url = artUrl || currentWallpaperImg.src;
-                    if ('mediaSession' in navigator && window.radioPlayer && window.radioPlayer.currentStationIndex !== -1 && url) {
+                // CORRECTED: Simplified function that uses the dedicated global variable
+                function updateMediaSessionArt() {
+                    if ('mediaSession' in navigator && window.radioPlayer && window.radioPlayer.currentStationIndex !== -1 && currentWallpaperUrl) {
                         const station = window.radioPlayer.stations[window.radioPlayer.currentStationIndex];
                         navigator.mediaSession.metadata = new MediaMetadata({
                             title: station.name,
                             artist: station.genre,
-                            artwork: [{ src: url }]
+                            artwork: [{ src: currentWallpaperUrl }]
                         });
                     }
                 }
@@ -770,14 +769,17 @@
                 
                 const getWps = () => JSON.parse(localStorage.getItem('lockscreenWallpapers_v2')) || [initialWallpaper];
                 const saveWps = (wps) => localStorage.setItem('lockscreenWallpapers_v2', JSON.stringify(wps));
+                
+                // CORRECTED: The setWp function now updates the global state variable
                 const setWp = (wpObj) => { 
                     exitPanningMode(); 
                     lockScreen.style.backgroundImage = `url('${wpObj.url}')`; 
                     lockScreen.style.backgroundPosition = wpObj.position || 'center center'; 
                     currentWallpaperImg.src = wpObj.url; 
-                    // CORRECTED: Explicitly update media session with the new wallpaper URL
-                    updateMediaSessionArt(wpObj.url);
+                    currentWallpaperUrl = wpObj.url; // This is the new, important line
+                    updateMediaSessionArt();
                 };
+
                 const renderWpChoices = () => { const cont = document.getElementById('wallpaper-choices'); cont.innerHTML = ''; getWps().forEach(wp => { const thumb = document.createElement('div'); thumb.className = 'wallpaper-thumbnail'; thumb.style.backgroundImage = `url('${wp.url}')`; const rmvBtn = document.createElement('span'); rmvBtn.className = 'remove-thumb-btn'; rmvBtn.innerHTML = '×'; rmvBtn.title = 'Remove wallpaper'; rmvBtn.addEventListener('click', (e) => { e.stopPropagation(); const newWps = getWps().filter(w => w.url !== wp.url); saveWps(newWps); renderWpChoices(); }); thumb.appendChild(rmvBtn); thumb.addEventListener('click', () => { setWp(wp); localStorage.setItem('lockscreenLastSelectedWp', wp.url); settingsMenu.classList.remove('visible'); }); cont.appendChild(thumb); }); };
                 document.getElementById('wallpaper-url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const url = e.target.value.trim(); if(url.toLowerCase().endsWith('.gif')) { alert('Please use the GIF widget to add GIFs.'); e.target.value = ''; return; } if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) { const wps = getWps(); if (!wps.some(w => w.url === url)) { const newWp = { url: url, position: 'center center' }; wps.push(newWp); saveWps(wps); setWp(newWp); localStorage.setItem('lockscreenLastSelectedWp', newWp.url); renderWpChoices(); } e.target.value = ''; settingsMenu.classList.remove('visible'); } else { alert('Invalid URL.'); } } });
                 function exitPanningMode() { if (!isPanningMode) return; isPanningMode = false; lockScreen.classList.remove('panning-active'); const url = currentWallpaperImg.src; const wps = getWps(); const idx = wps.findIndex(w => w.url === url); if (idx > -1) { wps[idx].position = lockScreen.style.backgroundPosition; saveWps(wps); } }
