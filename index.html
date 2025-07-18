@@ -60,6 +60,123 @@
         #gif-display { width: 100%; height: 100%; object-fit: contain; }
         #remove-gif-btn { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; background-color: rgba(231, 76, 60, 0.8); color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 16px; cursor: pointer; z-index: 12; }
         #gif-widget.has-gif:hover #remove-gif-btn { display: flex; }
+
+        /* --- Webcam Widget CSS --- */
+        #webcam-widget {
+            top: 20%;
+            left: 20%;
+            width: 320px;
+            height: 240px;
+            padding: 0;
+            resize: both;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            border-radius: 12px;
+            border: 2px solid var(--widget-bg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        .webcam-video-wrapper {
+            display: none;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            touch-action: none;
+            cursor: pointer;
+        }
+        .webcam-video-wrapper.normal-view {
+            transform: scaleX(1);
+        }
+        #webcam-canvas {
+            width: 100%;
+            height: 100%;
+            filter: grayscale(100%);
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+        }
+        #webcam-widget.active .webcam-video-wrapper {
+            display: block;
+        }
+        #webcam-widget.active #webcam-placeholder {
+            display: none;
+        }
+        #webcam-widget.webcam-pan-zoom-active {
+            box-shadow: 0 0 15px rgba(10, 132, 255, 0.7);
+            border-color: #0a84ff;
+        }
+        #webcam-widget.webcam-pan-zoom-active .webcam-video-wrapper {
+            cursor: grab;
+        }
+        #webcam-widget.webcam-pan-zoom-active .webcam-video-wrapper:active {
+            cursor: grabbing;
+        }
+        #webcam-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 10px;
+        }
+        #webcam-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: rgba(0,0,0,0.6);
+            padding: 5px 10px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 12;
+            pointer-events: none;
+        }
+        #webcam-widget:hover #webcam-controls {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #webcam-source-select {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 3px;
+            max-width: 150px;
+        }
+        #webcam-stop-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- Toggle Button CSS --- */
+        #webcam-toggle-btn {
+            top: 50%;
+            left: 50%;
+            background-color: rgba(80, 80, 80, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+        }
+        #webcam-toggle-btn i {
+            font-size: 28px;
+            color: white;
+        }
         
         #lock-screen.light-theme #music-artist { color: #555; }
         #settings-btn { top: 80%; left: 50px; }
@@ -156,6 +273,22 @@
             <div id="remove-gif-btn">×</div>
         </div>
 
+        <!-- CAMERA WIDGET -->
+        <div id="webcam-widget" class="draggable-item hidden" title="Click feed to mirror | Dbl-click feed for pan/zoom">
+            <div class="webcam-video-wrapper">
+                <canvas id="webcam-canvas"></canvas>
+                <video id="webcam-video-source" playsinline muted style="display: none;"></video>
+            </div>
+            <div id="webcam-placeholder"><i class="fa-solid fa-video-slash"></i><span>Camera Inactive</span></div>
+            <div id="webcam-controls">
+                <select id="webcam-source-select"><option>No Cams</option></select>
+                <button id="webcam-stop-btn" title="Stop Camera"><i class="fa-solid fa-power-off"></i></button>
+            </div>
+        </div>
+        <div id="webcam-toggle-btn" class="draggable-item app-icon" title="Toggle Camera">
+            <i class="fa-solid fa-video-slash"></i>
+        </div>
+
         <div id="settings-btn" class="draggable-item app-icon" title="Open settings menu"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" fill="rgba(80, 80, 80, 0.6)"/><circle cx="8" cy="8" r="4" fill="none" stroke="var(--icon-stroke-color)" stroke-width="1.5"/></svg></div>
         <div id="unlock-prompt">Press to unlock</div>
     </div>
@@ -170,6 +303,7 @@
                     <div class="setting-toggle"><label for="toggle-note-widget">Note Widget</label><input type="checkbox" id="toggle-note-widget"></div>
                     <div class="setting-toggle"><label for="toggle-music-widget">Music Widget</label><input type="checkbox" id="toggle-music-widget"></div>
                     <div class="setting-toggle"><label for="toggle-gif-widget">GIF Widget</label><input type="checkbox" id="toggle-gif-widget"></div>
+                    <div class="setting-toggle"><label for="toggle-camera-widget">Camera Widget</label><input type="checkbox" id="toggle-camera-widget"></div>
                 </div>
                 <div class="settings-section">
                     <h3>Theme & Style</h3>
@@ -220,14 +354,12 @@
         <div id="phone-upload-container">
             <h2>Add Content from Phone</h2>
             
-            <!-- API Key Prompt - Initially Hidden -->
             <div id="api-key-prompt" style="display: none; flex-direction: column; gap: 10px;">
                 <p>For this function to work you need to make a Image bb account and enter your private key.</p>
                 <input type="text" id="imgbb-api-key-input" placeholder="Your ImageBB API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;">
                 <button id="save-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button>
             </div>
 
-            <!-- Regular Upload UI -->
             <div id="regular-upload-ui" style="display: flex; flex-direction: column; gap: 10px;">
                 <label for="file-input" id="upload-label">Tap to Upload Image</label>
                 <input type="file" id="file-input" accept="image/*" style="display: none;">
@@ -242,13 +374,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const NPOINT_BIN_ID = 'f76d79c771a62c1ce33a'; // This is a public bin, consider creating your own on npoint.io
+            const NPOINT_BIN_ID = 'f76d79c771a62c1ce33a';
             const lockScreen = document.getElementById('lock-screen');
             const clock = document.getElementById('clock');
             const qrModal = document.getElementById('qr-modal');
             const initialWallpaper = { url: 'https://images.pexels.com/photos/807598/pexels-photo-807598.jpeg', position: 'center center' };
-            let isPanningMode = false, currentWallpaperImg = new Image(), pollingInterval, clickTimer, inactivityTimer, pressHoldTimer;
+            let isPanningMode = false, currentWallpaperImg = new Image(), currentWallpaperUrl = '', pollingInterval, clickTimer, inactivityTimer, pressHoldTimer;
             let hasMovedWp = false;
+            currentWallpaperImg.crossOrigin = "Anonymous";
 
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('upload') && urlParams.has('session')) {
@@ -266,7 +399,6 @@
                 const urlSubmitBtn = document.getElementById('phone-url-submit');
                 const statusElem = document.getElementById('upload-status');
                 const uploadLabel = document.getElementById('upload-label');
-                
                 const apiKeyPrompt = document.getElementById('api-key-prompt');
                 const apiKeyInput = document.getElementById('imgbb-api-key-input');
                 const saveApiKeyBtn = document.getElementById('save-api-key-btn');
@@ -311,7 +443,7 @@
                     if (!IMGBB_API_KEY) {
                         showApiKeyPrompt();
                         statusElem.textContent = "API Key required for upload.";
-                        fileInput.value = ''; // Reset file input
+                        fileInput.value = '';
                         return;
                     }
 
@@ -378,19 +510,227 @@
                 closeSettingsBtn.addEventListener('click', () => settingsMenu.classList.remove('visible'));
                 settingsMenu.addEventListener('click', (e) => { if (e.target === settingsMenu) settingsMenu.classList.remove('visible'); });
                 
-                // NEW: Helper function to update media session artwork
-                function updateMediaSessionArt() {
-                    if ('mediaSession' in navigator && window.radioPlayer && window.radioPlayer.currentStationIndex !== -1) {
+                async function updateMediaSessionArt() {
+                    if (!('mediaSession' in navigator) || !window.radioPlayer || window.radioPlayer.currentStationIndex === -1 || !currentWallpaperImg.src || currentWallpaperImg.naturalWidth === 0) {
+                        return;
+                    }
+
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const sourceImage = currentWallpaperImg;
+                        const sourceWidth = sourceImage.naturalWidth;
+                        const sourceHeight = sourceImage.naturalHeight;
+                        const size = Math.min(sourceWidth, sourceHeight);
+                        const sx = (sourceWidth - size) / 2;
+                        const sy = (sourceHeight - size) / 2;
+                        const outputSize = 512;
+                        canvas.width = outputSize;
+                        canvas.height = outputSize;
+
+                        ctx.drawImage(sourceImage, sx, sy, size, size, 0, 0, outputSize, outputSize);
+                        const squareArtUrl = canvas.toDataURL('image/jpeg', 0.9);
                         const station = window.radioPlayer.stations[window.radioPlayer.currentStationIndex];
+                        
                         navigator.mediaSession.metadata = new MediaMetadata({
                             title: station.name,
                             artist: station.genre,
                             artwork: [
-                                { src: currentWallpaperImg.src }
+                                { src: squareArtUrl, sizes: `${outputSize}x${outputSize}`, type: 'image/jpeg' }
                             ]
+                        });
+                    } catch (error) {
+                        console.error("Failed to create media session artwork:", error);
+                        const station = window.radioPlayer.stations[window.radioPlayer.currentStationIndex];
+                        navigator.mediaSession.metadata = new MediaMetadata({
+                            title: station.name,
+                            artist: station.genre,
+                            artwork: [{ src: currentWallpaperUrl }]
                         });
                     }
                 }
+
+                // --- CORE WEBCAM LOGIC ---
+                const webcamPlayer = {
+                    stream: null,
+                    animationFrameId: null,
+                    elements: {
+                        widget: document.getElementById('webcam-widget'),
+                        videoWrapper: document.querySelector('.webcam-video-wrapper'),
+                        video: document.getElementById('webcam-video-source'),
+                        canvas: document.getElementById('webcam-canvas'),
+                        canvasContext: null,
+                        select: document.getElementById('webcam-source-select'),
+                        stopBtn: document.getElementById('webcam-stop-btn'),
+                        placeholder: document.getElementById('webcam-placeholder'),
+                        toggleIcon: document.querySelector('#webcam-toggle-btn i'),
+                    },
+                    init() {
+                        this.elements.canvasContext = this.elements.canvas.getContext('2d');
+                        this.elements.select.addEventListener('change', () => this.start());
+                        this.elements.stopBtn.addEventListener('click', () => this.stop());
+                        this.populateDevices();
+                    },
+                    drawToCanvas() {
+                        if (!this.stream || !this.stream.active) return;
+                        const video = this.elements.video;
+                        const canvas = this.elements.canvas;
+                        const ctx = this.elements.canvasContext;
+                        if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+                            canvas.width = canvas.clientWidth;
+                            canvas.height = canvas.clientHeight;
+                        }
+                        if (canvas.width === 0 || canvas.height === 0 || video.videoWidth === 0) {
+                             this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas());
+                             return;
+                        }
+                        const vWidth = video.videoWidth;
+                        const vHeight = video.videoHeight;
+                        const cWidth = canvas.width;
+                        const cHeight = canvas.height;
+                        const vRatio = vWidth / vHeight;
+                        const cRatio = cWidth / cHeight;
+                        let sx, sy, sWidth, sHeight;
+                        if (vRatio > cRatio) {
+                            sHeight = vHeight;
+                            sWidth = vHeight * cRatio;
+                            sx = (vWidth - sWidth) / 2;
+                            sy = 0;
+                        } else {
+                            sWidth = vWidth;
+                            sHeight = vWidth / cRatio;
+                            sy = (vHeight - sHeight) / 2;
+                            sx = 0;
+                        }
+                        ctx.clearRect(0, 0, cWidth, cHeight);
+                        ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, cWidth, cHeight);
+                        this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas());
+                    },
+                    async populateDevices() {
+                        try {
+                            await navigator.mediaDevices.getUserMedia({video: true});
+                            const devices = await navigator.mediaDevices.enumerateDevices();
+                            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                            this.elements.select.innerHTML = '';
+                            if (videoDevices.length === 0) {
+                                this.elements.select.innerHTML = '<option value="">No cameras</option>';
+                                this.stop();
+                                return;
+                            }
+                            videoDevices.forEach((device, index) => {
+                                const option = document.createElement('option');
+                                option.value = device.deviceId;
+                                option.textContent = device.label || `Camera ${index + 1}`;
+                                this.elements.select.appendChild(option);
+                            });
+                        } catch (err) {
+                            console.error("Error enumerating devices:", err);
+                            this.elements.placeholder.querySelector('span').textContent = "Camera access denied";
+                        }
+                    },
+                    async start() {
+                        if (this.stream) this.stop(true);
+                        const deviceId = this.elements.select.value;
+                        if (!deviceId) return;
+                        try {
+                            this.stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } });
+                            this.elements.video.srcObject = this.stream;
+                            this.elements.video.onloadedmetadata = () => {
+                                this.elements.video.play();
+                                this.elements.widget.classList.remove('hidden');
+                                this.elements.widget.classList.add('active');
+                                if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video';
+                                this.drawToCanvas();
+                            };
+                        } catch (err) {
+                            console.error(`Error starting camera:`, err);
+                            this.stop();
+                        }
+                    },
+                    stop() {
+                        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                        if (this.stream) this.stream.getTracks().forEach(track => track.stop());
+                        this.stream = null;
+                        this.elements.video.srcObject = null;
+                        if (this.elements.canvasContext) {
+                            this.elements.canvasContext.clearRect(0, 0, this.elements.canvas.width, this.elements.canvas.height);
+                        }
+                        this.elements.widget.classList.remove('active');
+                        this.elements.widget.classList.add('hidden');
+                        if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video-slash';
+                    }
+                };
+
+                // --- PAN AND ZOOM LOGIC ---
+                let isWebcamPanZoomMode = false;
+                const videoWrapper = webcamPlayer.elements.videoWrapper;
+                const canvasEl = webcamPlayer.elements.canvas;
+                const get_touch_dist = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+                let webcam_transform = { scale: 1, panX: 0, panY: 0 };
+                let webcam_start_transform = null;
+                let webcam_start_touch = null;
+                let webcam_initial_pinch_dist = 0;
+                let webcamClickTimer = null;
+
+                function applyWebcamTransform() {
+                    canvasEl.style.transform = `translate(${webcam_transform.panX}px, ${webcam_transform.panY}px) scale(${webcam_transform.scale})`;
+                }
+                function resetWebcamTransform() {
+                    webcam_transform = { scale: 1, panX: 0, panY: 0 };
+                    applyWebcamTransform();
+                }
+
+                videoWrapper.addEventListener('click', () => {
+                    if (isWebcamPanZoomMode) return;
+                    clearTimeout(webcamClickTimer);
+                    webcamClickTimer = setTimeout(() => videoWrapper.classList.toggle('normal-view'), 250);
+                });
+                videoWrapper.addEventListener('dblclick', () => {
+                    clearTimeout(webcamClickTimer);
+                    isWebcamPanZoomMode = !isWebcamPanZoomMode;
+                    webcamPlayer.elements.widget.classList.toggle('webcam-pan-zoom-active', isWebcamPanZoomMode);
+                    if (!isWebcamPanZoomMode) resetWebcamTransform();
+                });
+                videoWrapper.addEventListener('touchstart', (e) => {
+                    if (!isWebcamPanZoomMode) return;
+                    e.preventDefault(); e.stopPropagation();
+                    webcam_start_transform = { ...webcam_transform };
+                    if (e.touches.length === 1) webcam_start_touch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    else if (e.touches.length === 2) webcam_initial_pinch_dist = get_touch_dist(e.touches);
+                }, { passive: false });
+                videoWrapper.addEventListener('touchmove', (e) => {
+                    if (!isWebcamPanZoomMode || !webcam_start_transform) return;
+                    e.preventDefault(); e.stopPropagation();
+                    if (e.touches.length === 2) {
+                        const scale_ratio = get_touch_dist(e.touches) / webcam_initial_pinch_dist;
+                        webcam_transform.scale = Math.max(1.0, webcam_start_transform.scale * scale_ratio);
+                    } else if (e.touches.length === 1 && webcam_start_touch) {
+                        const deltaX = e.touches[0].clientX - webcam_start_touch.x;
+                        const deltaY = e.touches[0].clientY - webcam_start_touch.y;
+                        const panDirection = videoWrapper.classList.contains('normal-view') ? 1 : -1;
+                        webcam_transform.panX = webcam_start_transform.panX + (deltaX * panDirection);
+                        webcam_transform.panY = webcam_start_transform.panY + deltaY;
+                    }
+                    const rect = videoWrapper.getBoundingClientRect();
+                    const max_panX = (rect.width * webcam_transform.scale - rect.width) / 2;
+                    const max_panY = (rect.height * webcam_transform.scale - rect.height) / 2;
+                    webcam_transform.panX = Math.max(-max_panX, Math.min(max_panX, webcam_transform.panX));
+                    webcam_transform.panY = Math.max(-max_panY, Math.min(max_panY, webcam_transform.panY));
+                    applyWebcamTransform();
+                }, { passive: false });
+                videoWrapper.addEventListener('touchend', () => { if (isWebcamPanZoomMode) { webcam_start_transform = null; webcam_start_touch = null; } });
+                
+                // --- INITIALIZE WEBCAM & TOGGLE ---
+                webcamPlayer.init();
+                const toggleBtn = document.getElementById('webcam-toggle-btn');
+                toggleBtn.addEventListener('click', () => {
+                    if (toggleBtn.style.cursor === 'grabbing') return;
+                    if (webcamPlayer.stream) {
+                        webcamPlayer.stop();
+                    } else {
+                        webcamPlayer.start();
+                    }
+                });
 
                 (function setupWidgets() {
                     const noteWidget = document.getElementById('note-widget');
@@ -506,8 +846,14 @@
                         },
                         updatePlayState(isPlaying) { this.elements.playPause.className = `fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`; },
                         togglePlay() { if (this.currentStationIndex !== -1) this.audio.paused ? this.audio.play() : this.audio.pause(); },
-                        playNext() { this.loadStation((this.currentStationIndex + 1) % this.stations.length); },
-                        playPrev() { this.loadStation((this.currentStationIndex - 1 + this.stations.length) % this.stations.length); },
+                        playNext() { 
+                            const newIndex = this.currentStationIndex < 0 ? 0 : (this.currentStationIndex + 1) % this.stations.length;
+                            this.loadStation(newIndex);
+                        },
+                        playPrev() { 
+                            const newIndex = this.currentStationIndex < 0 ? 0 : (this.currentStationIndex - 1 + this.stations.length) % this.stations.length;
+                            this.loadStation(newIndex);
+                        },
                         loadStation(index) {
                             if (this.currentStationIndex === index && !this.audio.paused) return;
                             this.currentStationIndex = index;
@@ -518,8 +864,6 @@
                             this.elements.artist.textContent = station.genre;
                             this.audio.src = station.streamUrl;
                             this.audio.play().catch(e => console.error("Audio play failed:", e));
-
-                            // MODIFIED: Use the helper function to set media metadata
                             updateMediaSessionArt();
                         },
                         openRadioMenu() {
@@ -644,11 +988,12 @@
                 })();
                 
                 (function setupBaseFeatures() {
-                    const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget'];
+                    const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'];
                     const WIDGETS = {
                         note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: false },
                         music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: false },
                         gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: false },
+                        camera: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-camera-widget'), default: false, extraEl: document.getElementById('webcam-toggle-btn') }
                     };
                     
                     function initializeWidgetToggles() {
@@ -658,11 +1003,13 @@
                             const isVisible = savedState === null ? widget.default : savedState === 'true';
                             
                             widget.el.classList.toggle('hidden', !isVisible);
+                            if (widget.extraEl) widget.extraEl.classList.toggle('hidden', !isVisible);
                             widget.toggle.checked = isVisible;
 
                             widget.toggle.addEventListener('change', () => {
                                 const isChecked = widget.toggle.checked;
                                 widget.el.classList.toggle('hidden', !isChecked);
+                                if (widget.extraEl) widget.extraEl.classList.toggle('hidden', !isChecked);
                                 localStorage.setItem(`widget_${key}_visible`, isChecked);
                             });
                         }
@@ -692,7 +1039,7 @@
                             if (e) {
                                 p[id] = { t: `${(e.offsetTop / lockScreen.clientHeight) * 100}%`, l: `${(e.offsetLeft / lockScreen.clientWidth) * 100}%` };
                                 if (id === 'clock') p[id].s = clockScale;
-                                if (id === 'note-widget' || id === 'gif-widget') { p[id].w = e.style.width; p[id].h = e.style.height; }
+                                if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget') { p[id].w = e.style.width; p[id].h = e.style.height; }
                             }
                         });
                         localStorage.setItem('lockscreenItemPositions_v5', JSON.stringify(p));
@@ -707,7 +1054,7 @@
                                     e.style.top = pos.t; e.style.left = pos.l;
                                     e.style.transform = (id === 'clock') ? 'none' : e.style.transform;
                                     if (id === 'clock' && pos.s) applyClockScale(pos.s);
-                                    if (id === 'note-widget' || id === 'gif-widget') { e.style.width = pos.w || e.style.width; e.style.height = pos.h || e.style.height; }
+                                    if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget') { e.style.width = pos.w || e.style.width; e.style.height = pos.h || e.style.height; }
                                 }
                             });
                         }
@@ -742,7 +1089,8 @@
                         };
                         const sD_longPress = (e) => {
                             if (el.isEditing) return;
-                            if (e.target.closest('#music-controls, #remove-gif-btn, #note-settings-btn')) return;
+                            if (e.target.closest('#music-controls, #remove-gif-btn, #note-settings-btn, #webcam-controls')) return;
+                            if (isWebcamPanZoomMode && e.target.closest('.webcam-video-wrapper')) return;
                             if (e.touches && e.touches.length === 2 && el.id === 'clock') { isPinching = true; isD = false; initialPinchDist = getDist(e.touches); initialScale = clockScale; return; }
                             
                             isD = true; hasMoved = false; e.target.hasMoved = false;
@@ -768,14 +1116,19 @@
                 
                 const getWps = () => JSON.parse(localStorage.getItem('lockscreenWallpapers_v2')) || [initialWallpaper];
                 const saveWps = (wps) => localStorage.setItem('lockscreenWallpapers_v2', JSON.stringify(wps));
+                
                 const setWp = (wpObj) => { 
                     exitPanningMode(); 
                     lockScreen.style.backgroundImage = `url('${wpObj.url}')`; 
                     lockScreen.style.backgroundPosition = wpObj.position || 'center center'; 
+                    
+                    currentWallpaperImg.onload = updateMediaSessionArt;
+                    currentWallpaperImg.onerror = () => console.error("Failed to load wallpaper for media session art.");
+
                     currentWallpaperImg.src = wpObj.url; 
-                    // MODIFIED: Update media session when wallpaper changes
-                    updateMediaSessionArt();
+                    currentWallpaperUrl = wpObj.url; 
                 };
+
                 const renderWpChoices = () => { const cont = document.getElementById('wallpaper-choices'); cont.innerHTML = ''; getWps().forEach(wp => { const thumb = document.createElement('div'); thumb.className = 'wallpaper-thumbnail'; thumb.style.backgroundImage = `url('${wp.url}')`; const rmvBtn = document.createElement('span'); rmvBtn.className = 'remove-thumb-btn'; rmvBtn.innerHTML = '×'; rmvBtn.title = 'Remove wallpaper'; rmvBtn.addEventListener('click', (e) => { e.stopPropagation(); const newWps = getWps().filter(w => w.url !== wp.url); saveWps(newWps); renderWpChoices(); }); thumb.appendChild(rmvBtn); thumb.addEventListener('click', () => { setWp(wp); localStorage.setItem('lockscreenLastSelectedWp', wp.url); settingsMenu.classList.remove('visible'); }); cont.appendChild(thumb); }); };
                 document.getElementById('wallpaper-url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const url = e.target.value.trim(); if(url.toLowerCase().endsWith('.gif')) { alert('Please use the GIF widget to add GIFs.'); e.target.value = ''; return; } if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) { const wps = getWps(); if (!wps.some(w => w.url === url)) { const newWp = { url: url, position: 'center center' }; wps.push(newWp); saveWps(wps); setWp(newWp); localStorage.setItem('lockscreenLastSelectedWp', newWp.url); renderWpChoices(); } e.target.value = ''; settingsMenu.classList.remove('visible'); } else { alert('Invalid URL.'); } } });
                 function exitPanningMode() { if (!isPanningMode) return; isPanningMode = false; lockScreen.classList.remove('panning-active'); const url = currentWallpaperImg.src; const wps = getWps(); const idx = wps.findIndex(w => w.url === url); if (idx > -1) { wps[idx].position = lockScreen.style.backgroundPosition; saveWps(wps); } }
@@ -829,7 +1182,7 @@
                     localStorage.removeItem('lockscreenLastGif');
                     window.radioPlayer.reset();
                     document.getElementById('gif-display').src = '';
-                    ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget'].forEach(id => {
+                    ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.cssText = '';
                     });
