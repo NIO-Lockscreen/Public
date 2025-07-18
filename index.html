@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dynamic Lockscreen</title>
     <!-- Favicons for Car Dash / Browser Tabs -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c2c2e'/%3E%3Cpath fill='white' d='M87.5,56.2c-2.4,0-4.5,1.7-5,4c-0.1,0.5-0.1,1-0.1,1.5c0,4.4,3.6,8,8,8s8-3.6,8-8c0-0.5-0.1-1-0.1-1.5 c-0.5-2.3-2.6-4-5-4H87.5z M25.4,61.7c-0.5-2.3-2.6-4-5,4c-2.4,0-4.5,1.7-5,4c-0.1,0.5-0.1,1-0.1,1.5c0,4.4,3.6,8,8,8s8-3.6,8-8 C25.5,62.7,25.5,62.2,25.4,61.7z M87.9,49.9L75.3,32.7c-1.3-1.8-3.4-2.8-5.6-2.8H29.1c-2.2,0-4.3,1.1-5.6,2.8L12.1,49.9 c-0.1,0.1-0.1,0.2-0.2,0.3c-1,1.2-1.5,2.7-1.5,4.3v10.3c0,0.8,0.7,1.5,1.5,1.5h3.4c0.6,0,1.1-0.4,1.4-0.9c0.7-1.4,2.2-2.4,3.8-2.4 c1.7,0,3.1,1,3.8,2.4c0.3,0.5,0.8,0.9,1.4,0.9h40.2c0.6,0,1.1-0.4,1.4-0.9c0.7-1.4,2.2-2.4,3.8-2.4c1.7,0,3.1,1,3.8,2.4 c0.3,0.5,0.8,0.9,1.4,0.9h3.4c0.8,0,1.5-0.7,1.5-1.5V54.4c0-1.6-0.5-3.1-1.5-4.3C88,50.1,88,50,87.9,49.9z M28.2,35.9h42.4l9.1,12.5 H19.1L28.2,35.9z'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c2c2e'/%3E%3Cpath fill='white' d='M87.5,56.2c-2.4,0-4.5,1.7-5,4c-0.1,0.5-0.1,1-0.1,1.5c0,4.4,3.6,8,8,8s8-3.6,8-8c0-0.5-0.1-1-0.1-1.5 c-0.5-2.3-2.6-4-5-4H87.5z M25.4,61.7c-0.5-2.3-2.6-4-5,4c-2.4,0-4.5,1.7-5,4c-0.1,0.5-0.1,1-0.1,1.5c0,4.4,3.6,8,8,8s8-3.6,8-8 C25.5,62.7,25.5,62.2,25.4,61.7z M87.9,49.9L75.3,32.7c-1.3-1.8-3.4-2.8-5.6-2.8H29.1c-2.2,0-4.3,1.1-5.6,2.8L12.1,49.9 c-0.1,0.1-0.1,0.2-0.2,0.3c-1,1.2-1.5,2.7-1.5,4.3v10.3c0,0.8,0.7,1.5,1.5,1.5h3.4c0.6,0,1.1-0.4,1.4-0.9c0.7-1.4,2.2-2.4,3.8-2.4 c1.7,0,3.1,1,3.8,2.4c0.3,0.5,0.8,0.9,1.4,0.9h40.2c0.6,0,1.1-0.4,1.4-0.9c0.7-1.4,2.2-2.4,3.8-2.4c1.7,0,3.1,1,3.8,2.4 c0.3,0.5,0.8,0.9,1.4,0.9h3.4c0.8,0,1.5-0.7,1.5-1.5V54.4c0-1.6-0.5-3.1-1.5-4.3C88,50.1,88,50,87.9,49.9z M28.2,35.9h42.4l9.1,12.5 H19.1L28.2,35.9z'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF0000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF0000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
@@ -629,6 +629,7 @@
                         }
                     },
                     async start() {
+                        if (!document.getElementById('toggle-camera-widget').checked) return;
                         if (this.stream) this.stop(true);
                         const deviceId = this.elements.select.value;
                         if (!deviceId) return;
@@ -637,8 +638,8 @@
                             this.elements.video.srcObject = this.stream;
                             this.elements.video.onloadedmetadata = () => {
                                 this.elements.video.play();
-                                this.elements.widget.classList.remove('hidden');
                                 this.elements.widget.classList.add('active');
+                                this.elements.widget.classList.remove('hidden');
                                 if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video';
                                 this.drawToCanvas();
                             };
@@ -990,27 +991,43 @@
                 (function setupBaseFeatures() {
                     const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'];
                     const WIDGETS = {
-                        note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: false },
-                        music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: false },
-                        gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: false },
-                        camera: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-camera-widget'), default: false, extraEl: document.getElementById('webcam-toggle-btn') }
+                        note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: true },
+                        music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: true },
+                        gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: true },
+                        camera: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-camera-widget'), default: true, extraEl: document.getElementById('webcam-toggle-btn') }
                     };
                     
                     function initializeWidgetToggles() {
                         for(const key in WIDGETS) {
                             const widget = WIDGETS[key];
                             const savedState = localStorage.getItem(`widget_${key}_visible`);
-                            const isVisible = savedState === null ? widget.default : savedState === 'true';
+                            const isEnabledInSettings = savedState === null ? widget.default : savedState === 'true';
                             
-                            widget.el.classList.toggle('hidden', !isVisible);
-                            if (widget.extraEl) widget.extraEl.classList.toggle('hidden', !isVisible);
-                            widget.toggle.checked = isVisible;
-
+                            widget.toggle.checked = isEnabledInSettings;
+                    
+                            if (widget.extraEl) {
+                                widget.extraEl.classList.toggle('hidden', !isEnabledInSettings);
+                            }
+                    
+                            if (key !== 'camera') {
+                                widget.el.classList.toggle('hidden', !isEnabledInSettings);
+                            }
+                    
                             widget.toggle.addEventListener('change', () => {
                                 const isChecked = widget.toggle.checked;
-                                widget.el.classList.toggle('hidden', !isChecked);
-                                if (widget.extraEl) widget.extraEl.classList.toggle('hidden', !isChecked);
                                 localStorage.setItem(`widget_${key}_visible`, isChecked);
+                    
+                                if (widget.extraEl) {
+                                    widget.extraEl.classList.toggle('hidden', !isChecked);
+                                }
+                    
+                                if (key === 'camera') {
+                                    if (!isChecked) {
+                                        webcamPlayer.stop(); 
+                                    }
+                                } else {
+                                    widget.el.classList.toggle('hidden', !isChecked);
+                                }
                             });
                         }
                     }
