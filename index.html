@@ -1,12 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dynamic Lockscreen</title>
-    <!-- Favicons for Car Dash / Browser Tabs -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF0000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF0000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
+    <!-- MODIFIED: Favicons for Car Dash / Browser Tabs -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c2c2e'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c2c2e'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
@@ -23,7 +24,7 @@
         html, body { height: 100%; width: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; }
         body { background-color: #1a1a1a; color: white; text-align: center; }
         #lock-screen { position: relative; width: 100vw; height: 100vh; background-image: url('https://images.pexels.com/photos/807598/pexels-photo-807598.jpeg'); background-size: cover; background-position: center center; overflow: hidden; transition: background-image 0.5s ease-in-out; text-align: left; --icon-stroke-color: white; }
-        #lock-screen.panning-active { cursor: grab; } #lock-screen.panning-active:active { cursor: grabbing; }
+        #lock-screen.panning-active { cursor: grab; border: 2px solid rgba(10, 132, 255, 0.6); box-shadow: inset 0 0 20px rgba(10, 132, 255, 0.3); } #lock-screen.panning-active:active { cursor: grabbing; }
         #status-bar { position: absolute; top: 20px; right: 30px; font-size: 1rem; text-shadow: var(--text-shadow); z-index: 20; color: var(--text-color); }
         #weather-info { display: flex; align-items: center; gap: 10px; user-select: none; padding: 10px 15px; border-radius: 12px; transition: background-color 0.2s; background-color: var(--widget-bg); }
         .draggable-item { position: absolute; user-select: none; cursor: grab; z-index: 10; } .draggable-item:active { cursor: grabbing; z-index: 11; }
@@ -33,6 +34,11 @@
         .app-icon svg { width: 100%; height: 100%; }
         #youtube-music-btn { top: 60%; left: calc(50% - 100px); } #youtube-btn { top: 60%; left: calc(50% + 30px); }
         .widget { background-color: var(--widget-bg); padding: 10px 15px; border-radius: 12px; color: var(--text-color); font-family: 'Roboto', sans-serif; text-shadow: var(--text-shadow); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+        #stock-widget { top: 75%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
+        .stock-row { display: flex; justify-content: space-between; align-items: center; }
+        .stock-info { display: flex; align-items: center; gap: 10px; font-weight: 500; letter-spacing: 0.5px;}
+        .stock-price { font-family: 'Roboto Mono', monospace; font-weight: 500; font-size: 1.1rem; }
+        .stock-info .fa-caret-up { color: #2ecc71; } .stock-info .fa-caret-down { color: #e74c3c; }
         
         #note-widget { top: 60%; left: 75%; width: 250px; height: 180px; padding: 0; resize: both; overflow: hidden; transition: box-shadow 0.3s; }
         #note-widget.edit-mode { cursor: default; box-shadow: 0 0 15px rgba(10, 132, 255, 0.7); }
@@ -46,7 +52,7 @@
 
         #music-widget { top: 45%; left: 10%; width: 300px; display: flex; flex-direction: column; justify-content: center; }
         #music-info-container { display: flex; gap: 12px; align-items: center; }
-        #music-album-art { width: 60px; height: 60px; background-size: cover; background-position: center; border-radius: 8px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
+        #music-album-art { width: 60px; height: 60px; background-size: cover; background-position: center; border-radius: 8px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 2rem; background-color: rgba(0,0,0,0.2); }
         #music-details { text-align: left; overflow: hidden; }
         #music-title { font-weight: 500; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
         #music-artist { font-size: 0.9em; color: #ccc; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
@@ -60,7 +66,7 @@
         #gif-display { width: 100%; height: 100%; object-fit: contain; }
         #remove-gif-btn { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; background-color: rgba(231, 76, 60, 0.8); color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 16px; cursor: pointer; z-index: 12; }
         #gif-widget.has-gif:hover #remove-gif-btn { display: flex; }
-
+        
         /* Webcam Widget CSS */
         #webcam-widget { top: 20%; left: 20%; width: 320px; height: 240px; padding: 0; resize: none; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #000; border: 1px solid var(--widget-bg); transition: box-shadow 0.3s, border-color 0.3s; }
         .webcam-video-wrapper { display: none; width: 100%; height: 100%; transform: scaleX(-1); /* Default to mirrored */ touch-action: none; /* For Pointer Events */ cursor: pointer; }
@@ -72,60 +78,16 @@
         #webcam-widget.webcam-pan-zoom-active { box-shadow: 0 0 15px rgba(10, 132, 255, 0.7); border-color: #0a84ff; }
         #webcam-widget.webcam-pan-zoom-active .webcam-video-wrapper { cursor: grab; }
         #webcam-widget.webcam-pan-zoom-active .webcam-video-wrapper:hover { cursor: grab; }
-        #webcam-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.7);
-            text-align: center;
-            padding: 10px;
-        }
-        #webcam-controls {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: rgba(0,0,0,0.6);
-            padding: 5px 10px;
-            border-radius: 8px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 12;
-            pointer-events: none;
-        }
-        #webcam-widget:hover #webcam-controls {
-            opacity: 1;
-            pointer-events: all;
-        }
-        #webcam-source-select {
-            background-color: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 3px;
-            max-width: 150px;
-        }
-        #webcam-stop-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-            display: flex;
-            align-items: center;
-        }
+        #webcam-placeholder { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 1.2rem; color: rgba(255, 255, 255, 0.7); text-align: center; padding: 10px; }
+        #webcam-controls { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background-color: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 8px; opacity: 0; transition: opacity 0.3s ease; z-index: 12; }
+        #webcam-widget:hover #webcam-controls { opacity: 1; }
+        #webcam-source-select { background-color: #333; color: white; border: 1px solid #555; border-radius: 5px; padding: 3px; max-width: 150px; }
+        #webcam-stop-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; display: flex; align-items: center; }
 
-        /* --- Toggle Button CSS --- */
+        /* NEW: Webcam Toggle Button */
         #webcam-toggle-btn {
-            top: 50%;
-            left: 50%;
+            top: 80%;
+            left: 130px; /* Initial position next to settings icon */
             background-color: rgba(80, 80, 80, 0.6);
             display: flex;
             justify-content: center;
@@ -136,21 +98,23 @@
             font-size: 28px;
             color: white;
         }
-        
+
         #lock-screen.light-theme #music-artist { color: #555; }
         #settings-btn { top: 80%; left: 50px; }
         #settings-btn svg circle:nth-child(2) { stroke: var(--icon-stroke-color); }
-        #settings-menu, #note-editor-menu, #radio-menu, #gif-chooser-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
-        #settings-menu.visible, #note-editor-menu.visible, #radio-menu.visible, #gif-chooser-menu.visible { display: flex; opacity: 1; }
+        #settings-menu, #stock-editor-menu, #note-editor-menu, #radio-menu, #gif-chooser-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+        #settings-menu.visible, #stock-editor-menu.visible, #note-editor-menu.visible, #radio-menu.visible, #gif-chooser-menu.visible { display: flex; opacity: 1; }
         .menu-content { background-color: #2c2c2e; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; color: #f2f2f7; text-align: left; position: relative; box-shadow: 0 5px 25px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s ease; }
         #radio-menu .menu-content, #gif-chooser-menu .menu-content { max-height: 80vh; overflow-y: auto; }
-        #settings-menu.visible .menu-content, #note-editor-menu.visible .menu-content, #radio-menu.visible .menu-content, #gif-chooser-menu.visible .menu-content { transform: scale(1); }
+        #stock-editor-menu .menu-content { text-align: center; }
+        #settings-menu.visible .menu-content, #stock-editor-menu.visible .menu-content, #note-editor-menu.visible .menu-content, #radio-menu.visible .menu-content, #gif-chooser-menu.visible .menu-content { transform: scale(1); }
         .menu-content h2 {text-align: center;}
-        #close-settings-btn, #close-note-editor-btn, #close-radio-btn, #close-gif-chooser-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; color: #aaa; font-size: 2rem; cursor: pointer; line-height: 1; z-index: 5; }
-        #wallpaper-url-input, #weather-location-input, #font-select, #clock-color-input, #note-font-select, #note-font-size-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none; }
+        #close-settings-btn, #close-stock-editor-btn, #close-note-editor-btn, #close-radio-btn, #close-gif-chooser-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; color: #aaa; font-size: 2rem; cursor: pointer; line-height: 1; z-index: 5; }
+        #wallpaper-url-input, #stock-symbols-input, #weather-location-input, #font-select, #clock-color-input, #note-font-select, #note-font-size-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none; }
         #note-font-size-input { -moz-appearance: textfield; } #note-font-size-input::-webkit-outer-spin-button, #note-font-size-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         #clock-color-input { padding: 5px; height: 50px; }
-        #qr-upload-btn, #reset-positions-btn, #add-new-gif-btn { background-color: #0a84ff; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9em; margin-top: 10px; }
+        #stock-symbols-input { margin: 10px 0; text-transform: uppercase; text-align: center; }
+        #save-stocks-btn, #qr-upload-btn, #reset-positions-btn, #add-new-gif-btn { background-color: #0a84ff; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9em; margin-top: 10px; }
         #add-new-gif-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
         #reset-positions-btn { background-color: #e74c3c; width: 100%; }
         .settings-section { margin-top: 25px; border-top: 1px solid #444; padding-top: 20px; }
@@ -189,9 +153,25 @@
         #phone-url-submit:disabled { background-color: #555; cursor: not-allowed; }
         #upload-label { display: inline-block; background-color: #34c759; color: white; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; }
         .separator-text { margin: 5px 0; font-style: italic; color: #888; }
+        .stock-flash-toggle { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; font-family: 'Roboto', sans-serif; }
+        #stock-flash-checkbox { width: 20px; height: 20px; }
+        .flash-overlay { position: fixed; left: 0; width: 100%; height: 40%; z-index: 9999; pointer-events: none; opacity: 0; }
+        #flash-top { top: 0; background: radial-gradient(ellipse at top, rgba(46, 204, 113, 0.5) 0%, rgba(46, 204, 113, 0) 80%); }
+        #flash-bottom { bottom: 0; background: radial-gradient(ellipse at bottom, rgba(231, 76, 60, 0.5) 0%, rgba(231, 76, 60, 0) 80%); }
+        .flash-active { animation: flash-in-out 1.5s ease-out; }
+        #flash-top.super-flash { background: radial-gradient(ellipse at top, rgba(46, 204, 113, 0.9) 0%, rgba(46, 204, 113, 0) 75%); }
+        #flash-bottom.super-flash { background: radial-gradient(ellipse at bottom, rgba(231, 76, 60, 0.9) 0%, rgba(231, 76, 60, 0) 75%); }
+        @keyframes flash-in-out { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+        .raining-icon { position: fixed; top: -50px; font-size: 2rem; z-index: 9998; pointer-events: none; opacity: 0.7; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .raining-icon.up { color: #2ecc71; animation-name: rise-anim; }
+        .raining-icon.down { color: #e74c3c; animation-name: fall-anim; }
+        @keyframes fall-anim { from { transform: translateY(-10vh) rotate(0deg); opacity: 1; } to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+        @keyframes rise-anim { from { transform: translateY(110vh) rotate(0deg); opacity: 1; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+        #fun-stock-name-display { position: absolute; bottom: 20vh; right: 5vw; font-size: 2.5rem; font-family: 'Oswald', sans-serif; color: var(--text-color); text-shadow: var(--text-shadow); opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
+        #fun-stock-name-display.visible { opacity: 1; pointer-events: auto; }
         #lock-screen.light-theme { --icon-stroke-color: #333; }
         #lock-screen.light-theme #clock { color: #333; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));}
-        #lock-screen.light-theme #status-bar, #lock-screen.light-theme #unlock-prompt, #lock-screen.light-theme #fullscreen-hint { color: var(--text-color-light); text-shadow: var(--text-shadow-light); }
+        #lock-screen.light-theme #status-bar, #lock-screen.light-theme #unlock-prompt, #lock-screen.light-theme #fullscreen-hint, #lock-screen.light-theme #fun-stock-name-display { color: var(--text-color-light); text-shadow: var(--text-shadow-light); }
         #lock-screen.light-theme .widget, #lock-screen.light-theme #weather-info { background-color: var(--widget-bg-light); color: var(--text-color-light); text-shadow: var(--text-shadow-light); }
         #lock-screen.light-theme #note-textarea, #lock-screen.light-theme #note-display { color: var(--text-color-light); }
     </style>
@@ -206,6 +186,8 @@
         <div id="youtube-btn" class="draggable-item app-icon"><a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FF0000"/><path d="M 35,29 A 10,10 0 0 0 25,39 V 61 A 10,10 0 0 0 35,71 H 65 A 10,10 0 0 0 75,61 V 39 A 10,10 0 0 0 65,29 Z" fill="white"/><polygon points="45,42 62,50 45,58" fill="#FF0000"/></svg></a></div>
         
         <!-- Widgets -->
+        <div id="stock-widget" class="draggable-item widget" title="Single-click to trigger effect | Double-click to edit"></div>
+        
         <div id="note-widget" class="draggable-item widget" title="Double-click to edit">
             <div id="note-display"></div>
             <textarea id="note-textarea" placeholder="Type a note..."></textarea>
@@ -232,28 +214,30 @@
             <div id="remove-gif-btn">×</div>
         </div>
 
-        <!-- CAMERA WIDGET -->
-        <div id="webcam-widget" class="draggable-item hidden" title="Dbl-click feed for pan/zoom">
+        <div id="webcam-widget" class="draggable-item widget" title="Long-press feed to mirror | Dbl-click feed for pan/zoom">
             <div class="webcam-video-wrapper">
                 <canvas id="webcam-canvas"></canvas>
+                <div id="webcam-controls">
+                    <select id="webcam-source-select"><option>No Cams</option></select>
+                    <button id="webcam-stop-btn" title="Stop Camera"><i class="fa-solid fa-power-off"></i></button>
+                </div>
                 <video id="webcam-video-source" playsinline muted style="display: none;"></video>
             </div>
             <div id="webcam-placeholder"><i class="fa-solid fa-video-slash"></i><span>Camera Inactive</span></div>
-            <div id="webcam-controls">
-                <select id="webcam-source-select"><option>No Cams</option></select>
-                <button id="webcam-stop-btn" title="Stop Camera"><i class="fa-solid fa-power-off"></i></button>
-            </div>
         </div>
 
+        <!-- CORRECTED ID AND LOGIC FOR THIS BUTTON -->
         <button id="webcam-portrait-btn" style="position: absolute; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 20; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1em;">9:16</button>
-        <div id="webcam-toggle-btn" class="draggable-item app-icon" title="Toggle Camera">
+
+        <!-- NEW: Webcam Toggle Button -->
+        <div id="webcam-toggle-btn" class="draggable-item app-icon hidden" title="Toggle Rear Seat Cam">
             <i class="fa-solid fa-video-slash"></i>
         </div>
 
         <div id="settings-btn" class="draggable-item app-icon" title="Open settings menu"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" fill="rgba(80, 80, 80, 0.6)"/><circle cx="8" cy="8" r="4" fill="none" stroke="var(--icon-stroke-color)" stroke-width="1.5"/></svg></div>
+        <div id="fun-stock-name-display" class="draggable-item"></div>
         <div id="unlock-prompt">Press to unlock</div>
     </div>
-
     <div id="settings-menu">
         <div class="menu-content">
             <button id="close-settings-btn">×</button>
@@ -261,10 +245,11 @@
             <div id="advanced-settings-view" class="hidden">
                  <div class="settings-section">
                     <h3>Widget Visibility</h3>
+                    <div class="setting-toggle"><label for="toggle-stock-widget">Stock Widget</label><input type="checkbox" id="toggle-stock-widget"></div>
                     <div class="setting-toggle"><label for="toggle-note-widget">Note Widget</label><input type="checkbox" id="toggle-note-widget"></div>
                     <div class="setting-toggle"><label for="toggle-music-widget">Music Widget</label><input type="checkbox" id="toggle-music-widget"></div>
                     <div class="setting-toggle"><label for="toggle-gif-widget">GIF Widget</label><input type="checkbox" id="toggle-gif-widget"></div>
-                    <div class="setting-toggle"><label for="toggle-camera-widget">Camera Widget</label><input type="checkbox" id="toggle-camera-widget"></div>
+                    <div class="setting-toggle"><label for="toggle-webcam-widget">Rear Seat Cam</label><input type="checkbox" id="toggle-webcam-widget"></div>
                 </div>
                 <div class="settings-section">
                     <h3>Theme & Style</h3>
@@ -305,34 +290,15 @@
             </div>
         </div>
     </div>
-    
+    <div id="stock-editor-menu"><div class="menu-content"><button id="close-stock-editor-btn">×</button><h2>Edit Stock Symbols</h2><div id="stock-regular-ui"><p>Enter up to 7 stock symbols, separated by commas.</p><input type="text" id="stock-symbols-input" placeholder="TSLA, GOOGL, AKBA..."><div class="stock-flash-toggle"><label for="stock-flash-checkbox">Stock Flash 🎉</label><input type="checkbox" id="stock-flash-checkbox"></div><button id="save-stocks-btn">Save and Update</button></div><div id="finnhub-api-key-prompt" style="display: none; flex-direction: column; gap: 10px; text-align: center;"><p>For stock data to work, you need a free Finnhub account and API key.</p><p><a href="https://finnhub.io/register" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p><input type="text" id="finnhub-api-key-input" placeholder="Your Finnhub API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;"><button id="save-finnhub-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button><button id="qr-finnhub-api-key-btn" style="background-color: #34c759; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; margin-top: 10px;">Enter from Phone</button></div></div></div>
     <div id="note-editor-menu"><div class="menu-content"><button id="close-note-editor-btn">×</button><h2>Edit Note Style</h2><div class="settings-section"><label for="note-font-select">Font Family</label><select id="note-font-select"><option value="'Roboto', sans-serif">Roboto (Default)</option><option value="'Lora', serif">Lora</option><option value="'Inter', sans-serif">Inter</option><option value="'Source Code Pro', monospace">Source Code Pro</option></select></div><div class="settings-section"><label for="note-font-size-input">Font Size (px)</label><input type="text" id="note-font-size-input" inputmode="numeric" pattern="[0-9]*" value="16"></div></div></div>
     <div id="radio-menu"><div class="menu-content"><button id="close-radio-btn">×</button><h2>Select a Radio Station</h2><div id="radio-channel-list"></div></div></div>
     <div id="gif-chooser-menu"><div class="menu-content"><button id="close-gif-chooser-btn">×</button><h2>Choose a GIF</h2><div id="gif-choices"></div><button id="add-new-gif-btn"><i class="fa-solid fa-plus"></i> Add New GIF</button></div></div>
     <div id="qr-modal"><div id="qr-modal-content"><h2>Scan with your phone</h2><div id="qr-code"></div><p>Scan to send an image URL from your phone.</p></div></div>
+    <div id="upload-view"><div id="phone-upload-container"><h2>Add Wallpaper from Phone</h2><div id="regular-upload-ui"><label for="file-input" id="upload-label">Tap to Upload Image</label><input type="file" id="file-input" accept="image/*" style="display: none;"><p class="separator-text">... or ...</p><p>Paste an image URL below</p><input type="url" id="phone-url-input" placeholder="https://example.com/image.jpg"><button id="phone-url-submit">Use this URL</button></div><div id="imgbb-api-key-prompt" style="display: none; flex-direction: column; gap: 10px;"><p>For image uploads to work, you need a free ImageBB account and API key.</p><p><a href="https://api.imgbb.com/" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p><input type="text" id="imgbb-api-key-input" placeholder="Your ImageBB API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;"><button id="save-imgbb-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button><button id="qr-imgbb-api-key-btn" style="background-color: #34c759; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; margin-top: 10px;">Enter from Phone</button></div><h2 id="upload-status"></h2></div></div>
+    <div id="flash-top" class="flash-overlay"></div>
+    <div id="flash-bottom" class="flash-overlay"></div>
     
-    <div id="upload-view">
-        <div id="phone-upload-container">
-            <h2>Add Content from Phone</h2>
-            
-            <div id="api-key-prompt" style="display: none; flex-direction: column; gap: 10px;">
-                <p>For this function to work you need to make a Image bb account and enter your private key.</p>
-                <input type="text" id="imgbb-api-key-input" placeholder="Your ImageBB API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;">
-                <button id="save-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button>
-            </div>
-
-            <div id="regular-upload-ui" style="display: flex; flex-direction: column; gap: 10px;">
-                <label for="file-input" id="upload-label">Tap to Upload Image</label>
-                <input type="file" id="file-input" accept="image/*" style="display: none;">
-                <p class="separator-text">... or ...</p>
-                <p>Paste an image/GIF URL below</p>
-                <input type="url" id="phone-url-input" placeholder="https://example.com/image.jpg">
-                <button id="phone-url-submit">Use this URL</button>
-            </div>
-            <h2 id="upload-status"></h2>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const NPOINT_BIN_ID = 'f76d79c771a62c1ce33a';
@@ -340,18 +306,75 @@
             const clock = document.getElementById('clock');
             const qrModal = document.getElementById('qr-modal');
             const initialWallpaper = { url: 'https://images.pexels.com/photos/807598/pexels-photo-807598.jpeg', position: 'center center' };
-            let isPanningMode = false, currentWallpaperImg = new Image(), currentWallpaperUrl = '', pollingInterval, clickTimer, inactivityTimer, pressHoldTimer;
+            let isPanningMode = false, currentWallpaperImg = new Image(), pollingInterval, clickTimer, inactivityTimer, pressHoldTimer;
             let hasMovedWp = false;
+            let stockFlashIndex = 0;
+            let stockNameFadeOutTimer = null;
+            let stockWidgetClickTimer = null;
+            window.isWebcamPanZoomMode = false;
             currentWallpaperImg.crossOrigin = "Anonymous";
 
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('upload') && urlParams.has('session')) {
                 document.body.style.backgroundColor = '#1a1a1a';
-                ['lock-screen', 'settings-menu', 'note-editor-menu', 'qr-modal'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+                ['lock-screen', 'settings-menu', 'stock-editor-menu', 'qr-modal'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
                 document.getElementById('upload-view').style.display = 'flex';
                 handlePhoneUpload(urlParams.get('session'));
             } else {
                 initializeLockscreen();
+            }
+
+            function handleApiKeySetup(session) {
+                document.body.style.backgroundColor = '#1a1a1a';
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('upload-view').style.display = 'flex';
+                
+                const container = document.getElementById('phone-upload-container');
+                const statusElem = document.getElementById('upload-status');
+                
+                // Determine API key type
+                const isImgbbKey = session.includes('imgbb_api_key_');
+                const isFinnhubKey = session.includes('finnhub_api_key_');
+                
+                container.innerHTML = `
+                    <h2>Enter API Key from Phone</h2>
+                    <p>${isImgbbKey ? 'Enter your ImageBB API key' : 'Enter your Finnhub API key'}</p>
+                    <p><a href="${isImgbbKey ? 'https://api.imgbb.com/' : 'https://finnhub.io/register'}" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p>
+                    <input type="text" id="api-key-phone-input" placeholder="${isImgbbKey ? 'Your ImageBB API Key' : 'Your Finnhub API Key'}" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none; margin: 10px 0;">
+                    <button id="submit-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; width: 100%;">Save API Key</button>
+                    <h2 id="upload-status"></h2>
+                `;
+                
+                const apiKeyInput = document.getElementById('api-key-phone-input');
+                const submitBtn = document.getElementById('submit-api-key-btn');
+                const newStatusElem = document.getElementById('upload-status');
+                
+                submitBtn.addEventListener('click', () => {
+                    const apiKey = apiKeyInput.value.trim();
+                    if (!apiKey) {
+                        newStatusElem.textContent = 'Please enter a valid API key.';
+                        return;
+                    }
+                    
+                    newStatusElem.textContent = 'Sending API key to PC...';
+                    submitBtn.disabled = true;
+                    apiKeyInput.disabled = true;
+                    
+                    fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ [session]: apiKey })
+                    })
+                    .then(r => {
+                        if (!r.ok) throw new Error('Failed to send API key.');
+                        newStatusElem.textContent = 'Success! API key sent to PC. You can close this window.';
+                    })
+                    .catch(e => {
+                        newStatusElem.textContent = `Error: ${e.message}`;
+                        submitBtn.disabled = false;
+                        apiKeyInput.disabled = false;
+                    });
+                });
             }
 
             function handlePhoneUpload(session) {
@@ -360,10 +383,16 @@
                 const urlSubmitBtn = document.getElementById('phone-url-submit');
                 const statusElem = document.getElementById('upload-status');
                 const uploadLabel = document.getElementById('upload-label');
-                const apiKeyPrompt = document.getElementById('api-key-prompt');
+                const apiKeyPrompt = document.getElementById('imgbb-api-key-prompt');
                 const apiKeyInput = document.getElementById('imgbb-api-key-input');
-                const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+                const saveApiKeyBtn = document.getElementById('save-imgbb-api-key-btn');
                 const regularUploadUI = document.getElementById('regular-upload-ui');
+                
+                // Check if this is an API key setup session
+                if (session.includes('_api_key_')) {
+                    handleApiKeySetup(session);
+                    return;
+                }
 
                 function showApiKeyPrompt() {
                     regularUploadUI.style.display = 'none';
@@ -375,6 +404,7 @@
                     regularUploadUI.style.display = 'flex';
                 }
 
+                // Save API key
                 saveApiKeyBtn.addEventListener('click', () => {
                     const key = apiKeyInput.value.trim();
                     if (key) {
@@ -385,6 +415,12 @@
                     } else {
                         statusElem.textContent = "Please enter a valid API key.";
                     }
+                });
+
+                // QR code for ImageBB API key entry
+                const qrImgbbApiKeyBtn = document.getElementById('qr-imgbb-api-key-btn');
+                qrImgbbApiKeyBtn.addEventListener('click', () => {
+                    window.startPolling(`imgbb_api_key_${Date.now()}`, 'imgbb-api-key');
                 });
 
                 const sendUrlToLockscreen = (imageUrl) => {
@@ -398,8 +434,9 @@
 
                 fileInput.addEventListener('change', (e) => { 
                     const file = e.target.files[0]; 
-                    if (!file) return;
+                    if (!file) return; 
 
+                    // Check for API key
                     const IMGBB_API_KEY = localStorage.getItem('imgbbApiKey');
                     if (!IMGBB_API_KEY) {
                         showApiKeyPrompt();
@@ -413,26 +450,19 @@
                     formData.append('key', IMGBB_API_KEY); 
                     formData.append('image', file); 
                     fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
-                        .then(response => response.json())
-                        .then(data => { 
-                            if (data.success) { 
-                                sendUrlToLockscreen(data.data.url); 
-                            } else { 
-                                throw new Error(data.error.message || 'ImgBB upload failed.'); 
-                            } 
-                        }).catch(error => { 
-                            statusElem.textContent = `Error: ${error.message}`; 
-                        }); 
+                    .then(response => response.json())
+                    .then(data => { 
+                        if (data.success) { 
+                            sendUrlToLockscreen(data.data.url); 
+                        } else { 
+                            throw new Error(data.error.message || 'ImgBB upload failed.'); 
+                        } 
+                    })
+                    .catch(error => { 
+                        statusElem.textContent = `Error: ${error.message}`; 
+                    }); 
                 });
-
-                urlSubmitBtn.addEventListener('click', () => { 
-                    const imageUrl = urlInput.value.trim(); 
-                    if (!imageUrl || !imageUrl.startsWith('http')) { 
-                        statusElem.textContent = 'Please enter a valid image URL.'; 
-                        return; 
-                    } 
-                    sendUrlToLockscreen(imageUrl); 
-                });
+                urlSubmitBtn.addEventListener('click', () => { const imageUrl = urlInput.value.trim(); if (!imageUrl || !imageUrl.startsWith('http')) { statusElem.textContent = 'Please enter a valid image URL.'; return; } sendUrlToLockscreen(imageUrl); });
             }
 
             function initializeLockscreen() {
@@ -470,277 +500,165 @@
 
                 closeSettingsBtn.addEventListener('click', () => settingsMenu.classList.remove('visible'));
                 settingsMenu.addEventListener('click', (e) => { if (e.target === settingsMenu) settingsMenu.classList.remove('visible'); });
+
+                // API Key helper functions
+                const getFinnhubApiKey = () => localStorage.getItem('finnhubApiKey');
+                const requiresFinnhubApiKey = () => !getFinnhubApiKey();
                 
-                async function updateMediaSessionArt() {
-                    if (!('mediaSession' in navigator) || !window.radioPlayer || window.radioPlayer.currentStationIndex === -1 || !currentWallpaperImg.src || currentWallpaperImg.naturalWidth === 0) {
-                        return;
+                const stockWidget = document.getElementById('stock-widget');
+                const stockEditorMenu = document.getElementById('stock-editor-menu');
+                const closeStockEditorBtn = document.getElementById('close-stock-editor-btn');
+                const saveStocksBtn = document.getElementById('save-stocks-btn');
+                const stockSymbolsInput = document.getElementById('stock-symbols-input');
+                const stockFlashCheckbox = document.getElementById('stock-flash-checkbox');
+                const stockRegularUI = document.getElementById('stock-regular-ui');
+                const finnhubApiKeyPrompt = document.getElementById('finnhub-api-key-prompt');
+                const finnhubApiKeyInput = document.getElementById('finnhub-api-key-input');
+                const saveFinnhubApiKeyBtn = document.getElementById('save-finnhub-api-key-btn');
+
+                function showStockApiKeyPrompt() {
+                    stockRegularUI.style.display = 'none';
+                    finnhubApiKeyPrompt.style.display = 'flex';
+                }
+
+                function hideStockApiKeyPrompt() {
+                    finnhubApiKeyPrompt.style.display = 'none';
+                    stockRegularUI.style.display = 'flex';
+                }
+
+                // Save Finnhub API key
+                saveFinnhubApiKeyBtn.addEventListener('click', () => {
+                    const key = finnhubApiKeyInput.value.trim();
+                    if (key) {
+                        localStorage.setItem('finnhubApiKey', key);
+                        hideStockApiKeyPrompt();
+                        updateStockWidget(); // Refresh stock data with new key
+                    } else {
+                        alert("Please enter a valid API key.");
                     }
+                });
 
-                    try {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const sourceImage = currentWallpaperImg;
-                        const sourceWidth = sourceImage.naturalWidth;
-                        const sourceHeight = sourceImage.naturalHeight;
-                        const size = Math.min(sourceWidth, sourceHeight);
-                        const sx = (sourceWidth - size) / 2;
-                        const sy = (sourceHeight - size) / 2;
-                        const outputSize = 512;
-                        canvas.width = outputSize;
-                        canvas.height = outputSize;
+                // QR code for Finnhub API key entry
+                const qrFinnhubApiKeyBtn = document.getElementById('qr-finnhub-api-key-btn');
+                qrFinnhubApiKeyBtn.addEventListener('click', () => {
+                    window.startPolling(`finnhub_api_key_${Date.now()}`, 'finnhub-api-key');
+                });
 
-                        ctx.drawImage(sourceImage, sx, sy, size, size, 0, 0, outputSize, outputSize);
-                        const squareArtUrl = canvas.toDataURL('image/jpeg', 0.9);
-                        const station = window.radioPlayer.stations[window.radioPlayer.currentStationIndex];
-                        
-                        navigator.mediaSession.metadata = new MediaMetadata({
-                            title: station.name,
-                            artist: station.genre,
-                            artwork: [
-                                { src: squareArtUrl, sizes: `${outputSize}x${outputSize}`, type: 'image/jpeg' }
-                            ]
-                        });
-                    } catch (error) {
-                        console.error("Failed to create media session artwork:", error);
-                        const station = window.radioPlayer.stations[window.radioPlayer.currentStationIndex];
-                        navigator.mediaSession.metadata = new MediaMetadata({
-                            title: station.name,
-                            artist: station.genre,
-                            artwork: [{ src: currentWallpaperUrl }]
-                        });
+                const getStockSymbols = () => JSON.parse(localStorage.getItem('lockscreenStockSymbols')) || ['NIO'];
+                const saveStockSymbols = (symbols) => localStorage.setItem('lockscreenStockSymbols', JSON.stringify(symbols));
+                const getStockFlashState = () => localStorage.getItem('lockscreenStockFlashEnabled') === 'true';
+                const saveStockFlashState = (isEnabled) => localStorage.setItem('lockscreenStockFlashEnabled', isEnabled);
+                
+                stockFlashCheckbox.checked = getStockFlashState();
+                stockFlashCheckbox.addEventListener('change', () => saveStockFlashState(stockFlashCheckbox.checked));
+
+                function triggerScreenFlash(isUp, isSuper = false) {
+                    const flashEl = isUp ? document.getElementById('flash-top') : document.getElementById('flash-bottom');
+                    if (isSuper) flashEl.classList.add('super-flash');
+                    flashEl.classList.add('flash-active');
+                    setTimeout(() => {
+                        flashEl.classList.remove('flash-active');
+                        if (isSuper) flashEl.classList.remove('super-flash');
+                    }, 1500);
+                }
+
+                function triggerIconShower(isUp, isSuper = false) {
+                    const iconCount = isSuper ? 60 : 20;
+                    for (let i = 0; i < iconCount; i++) {
+                        const icon = document.createElement('i');
+                        icon.className = `fa-solid raining-icon ${isUp ? 'fa-caret-up up' : 'fa-caret-down down'}`;
+                        icon.style.left = `${Math.random() * 100}vw`;
+                        icon.style.animationDuration = `${(Math.random() * 2) + 3}s`;
+                        icon.style.animationDelay = `${Math.random() * 2}s`;
+                        icon.style.transform = `scale(${(Math.random() * 0.5) + 0.8})`;
+                        icon.addEventListener('animationend', () => icon.remove());
+                        document.body.appendChild(icon);
                     }
                 }
 
-                // =================================================================
-                // WEBCAM WIDGET LOGIC
-                // =================================================================
+                function triggerStockFlashEffect(isUp, isSuper, symbol) {
+                    const nameDisplay = document.getElementById('fun-stock-name-display');
+                    nameDisplay.textContent = symbol;
+                    nameDisplay.classList.add('visible');
+
+                    if (stockNameFadeOutTimer) clearTimeout(stockNameFadeOutTimer);
+
+                    setTimeout(() => {
+                        triggerScreenFlash(isUp, isSuper);
+                        triggerIconShower(isUp, isSuper);
+                    }, 1500);
+
+                    stockNameFadeOutTimer = setTimeout(() => {
+                        nameDisplay.classList.remove('visible');
+                    }, 4500);
+                }
                 
-                const webcamWidget = document.getElementById('webcam-widget');
-                const videoWrapper = webcamWidget.querySelector('.webcam-video-wrapper');
-                const canvasEl = webcamWidget.querySelector('#webcam-canvas');
-                const portraitBtn = document.getElementById('webcam-portrait-btn');
+                function isMarketOpen() {
+                    const now = new Date();
+                    const day = now.getDay(); 
+                    const hour = now.getHours();
+                    const minute = now.getMinutes();
+                    if (day < 1 || day > 5) return false;
+                    const currentTime = hour * 100 + minute;
+                    return currentTime >= 1530 && currentTime < 2100;
+                }
                 
-                let isWebcamPortraitMode = false;
-                let webcam_transform = { scale: 1, panX: 0, panY: 0 };
-                let webcamGlowTimeout = null;
-                let webcamLastTap = 0;
-                window.isWebcamPanZoomMode = false;
+                function handleStockData(data, symbol) {
+                    if (!data || typeof data.c === 'undefined' || typeof data.o === 'undefined' || data.o === 0 || data.c === data.o) return;
+                    const isUp = data.c > data.o;
+                    const percentChange = ((data.c - data.o) / data.o) * 100;
+                    const isSuper = Math.abs(percentChange) > 5;
+                    triggerStockFlashEffect(isUp, isSuper, symbol);
+                }
                 
-                const webcamPlayer = {
-                    stream: null,
-                    animationFrameId: null,
-                    elements: {
-                        widget: webcamWidget,
-                        video: webcamWidget.querySelector('#webcam-video-source'),
-                        canvas: canvasEl,
-                        canvasContext: canvasEl.getContext('2d'),
-                        select: webcamWidget.querySelector('#webcam-source-select'),
-                        stopBtn: webcamWidget.querySelector('#webcam-stop-btn'),
-                        toggleIcon: document.querySelector('#webcam-toggle-btn i'),
-                    },
-                    init() {
-                        this.elements.select.addEventListener('change', () => this.start());
-                        this.elements.stopBtn.addEventListener('click', () => this.stop());
-                        this.populateDevices();
-                    },
-                    drawToCanvas() {
-                        if (!this.stream || !this.stream.active) return;
-                        const video = this.elements.video;
-                        const canvas = this.elements.canvas;
-                        const ctx = this.elements.canvasContext;
-                        if (!video.videoWidth || !video.videoHeight) { this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas()); return; }
-                        if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
-                        if (canvas.width === 0 || canvas.height === 0) { this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas()); return; }
-                        let vWidth = video.videoWidth, vHeight = video.videoHeight, sx = 0, sy = 0, sWidth = vWidth, sHeight = vHeight;
-                        if (isWebcamPortraitMode) {
-                            const targetRatio = 9 / 16; const videoRatio = vWidth / vHeight;
-                            if (videoRatio > targetRatio) { sWidth = vHeight * targetRatio; sx = (vWidth - sWidth) / 2; } 
-                            else { sHeight = vWidth / targetRatio; sy = (vHeight - sHeight) / 2; }
-                        } else { sHeight = vHeight * 0.8; sy = 0; }
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
-                        this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas());
-                    },
-                    async populateDevices(shouldAutoload = false) {
-                        try {
-                            const devices = await navigator.mediaDevices.enumerateDevices();
-                            const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                            const currentDeviceId = this.stream ? this.stream.getVideoTracks()[0].getSettings().deviceId : null;
-                            this.elements.select.innerHTML = '';
-                            if (videoDevices.length === 0) { this.elements.select.innerHTML = '<option value="">No cameras</option>'; this.stop(); return; }
-                            videoDevices.forEach((device, i) => {
-                                const option = document.createElement('option');
-                                option.value = device.deviceId; option.textContent = device.label || `Camera ${i + 1}`;
-                                this.elements.select.appendChild(option);
-                            });
-                            if (currentDeviceId && this.elements.select.querySelector(`option[value="${currentDeviceId}"]`)) { this.elements.select.value = currentDeviceId; }
-                            if (shouldAutoload && !this.stream && videoDevices.length > 0) { this.elements.select.value = videoDevices[0].deviceId; this.start(); }
-                        } catch (err) { console.error("Error enumerating devices:", err); }
-                    },
-                    async start() {
-                        if (!document.getElementById('toggle-camera-widget').checked) return;
-                        this.elements.widget.classList.remove('hidden');
-                        if (this.stream) {
-                            if (this.stream.getVideoTracks()[0].getSettings().deviceId === this.elements.select.value) return;
-                            this.stop(true);
-                        }
-                        const deviceId = this.elements.select.value;
-                        if (!deviceId) return;
-                        try {
-                            this.stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } });
-                            this.elements.video.srcObject = this.stream;
-                            this.elements.video.onloadedmetadata = () => {
-                                this.elements.video.play();
-                                this.elements.widget.classList.add('active');
-                                if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video';
-                                this.drawToCanvas();
-                            };
-                        } catch (err) { console.error(`Error starting camera:`, err); this.stop(); }
-                    },
-                    stop(isRestarting = false) {
-                        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-                        this.animationFrameId = null;
-                        if (this.stream) this.stream.getTracks().forEach(track => track.stop());
-                        this.stream = null;
-                        this.elements.video.srcObject = null;
-                        this.elements.canvasContext.clearRect(0, 0, this.elements.canvas.width, this.elements.canvas.height);
-                        this.elements.widget.classList.remove('active');
-                        if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video-slash';
-                        if (!isRestarting) {
-                            this.elements.widget.classList.add('hidden');
-                        }
-                    },
-                    savePanZoomState() { localStorage.setItem('webcamPanZoomState', JSON.stringify(webcam_transform)); },
-                    loadPanZoomState() {
-                        const state = localStorage.getItem('webcamPanZoomState');
-                        if (state) {
-                            try {
-                                const obj = JSON.parse(state);
-                                if (typeof obj.scale === 'number' && typeof obj.panX === 'number' && typeof obj.panY === 'number') {
-                                    webcam_transform = obj;
-                                    applyWebcamTransform();
+                function checkStockFlashTrigger() {
+                    if (!getStockFlashState() || !isMarketOpen()) return;
+                    const apiKey = getFinnhubApiKey();
+                    if (!apiKey) return; // Skip if no API key
+                    
+                    const symbols = getStockSymbols();
+                    if (symbols.length === 0) return;
+                    const symbol = symbols[stockFlashIndex];
+                    stockFlashIndex = (stockFlashIndex + 1) % symbols.length;
+
+                    fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
+                        .then(r => r.json()).then(data => handleStockData(data, symbol))
+                        .catch(err => console.error(`Stock Flash fetch error for ${symbol}:`, err));
+                }
+
+                function updateStockWidget() {
+                    const symbols = getStockSymbols();
+                    const apiKey = getFinnhubApiKey();
+                    stockWidget.innerHTML = '';
+                    
+                    if (!apiKey) { 
+                        stockWidget.innerHTML = '<div class="stock-row"><span style="color: #0a84ff; cursor: pointer;" onclick="document.getElementById(\'stock-editor-menu\').classList.add(\'visible\');">Add API Key for Stocks</span></div>'; 
+                        return; 
+                    }
+                    
+                    symbols.forEach(symbol => {
+                        const row = document.createElement('div'); row.className = 'stock-row';
+                        row.innerHTML = `<div class="stock-info"><i class="fa-solid"></i> ${symbol}</div><span class="stock-price">...</span>`;
+                        stockWidget.appendChild(row);
+                        fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
+                            .then(r => r.json()).then(data => {
+                                if (!data || typeof data.c === 'undefined' || data.o === 0) { row.querySelector('.stock-price').textContent = 'N/A'; return; }
+                                const priceEl = row.querySelector('.stock-price');
+                                const iconEl = row.querySelector('i');
+                                priceEl.textContent = (data.c < 10) ? data.c.toFixed(3) : data.c.toFixed(2);
+                                iconEl.className = 'fa-solid';
+                                if (data.c > data.o) {
+                                    iconEl.classList.add('fa-caret-up');
+                                } else if (data.c < data.o) {
+                                    iconEl.classList.add('fa-caret-down');
                                 }
-                            } catch {}
-                        }
-                    },
-                };
-                webcamPlayer.init();
-                
-                function applyWebcamTransform() {
-                    canvasEl.style.transform = `scale(${webcam_transform.scale}) translate(${webcam_transform.panX}px, ${webcam_transform.panY}px)`;
+                            })
+                            .catch(err => {
+                                row.querySelector('.stock-price').textContent = 'Error';
+                                console.error(`Stock fetch error for ${symbol}:`, err);
+                            });
+                    });
                 }
-
-                function updatePortraitBtnPosition() {
-                    const rect = webcamWidget.getBoundingClientRect();
-                    portraitBtn.style.left = `${rect.left + (rect.width / 2) - (portraitBtn.offsetWidth / 2)}px`;
-                    portraitBtn.style.top = `${rect.bottom + 10}px`;
-                }
-
-                function showPortraitBtn() {
-                    updatePortraitBtnPosition();
-                    portraitBtn.style.opacity = '1';
-                    portraitBtn.style.pointerEvents = 'auto';
-                }
-
-                function hidePortraitBtn() {
-                    portraitBtn.style.opacity = '0';
-                    portraitBtn.style.pointerEvents = 'none';
-                }
-
-                function updatePortraitBtnVisibility() {
-                    if (window.isWebcamPanZoomMode) {
-                        showPortraitBtn();
-                    } else {
-                        hidePortraitBtn();
-                    }
-                }
-
-                function toggleWebcamPanZoomMode() {
-                    window.isWebcamPanZoomMode = !window.isWebcamPanZoomMode;
-                    webcamWidget.classList.toggle('webcam-pan-zoom-active', window.isWebcamPanZoomMode);
-                    updatePortraitBtnVisibility(); 
-                    if (window.isWebcamPanZoomMode) {
-                        webcamPlayer.loadPanZoomState();
-                        clearTimeout(webcamGlowTimeout);
-                        webcamGlowTimeout = setTimeout(() => {
-                           toggleWebcamPanZoomMode();
-                        }, 15000); 
-                    } else {
-                        clearTimeout(webcamGlowTimeout);
-                    }
-                }
-
-                videoWrapper.addEventListener('dblclick', (e) => {
-                    e.preventDefault(); e.stopPropagation();
-                    toggleWebcamPanZoomMode();
-                });
-
-                webcamWidget.addEventListener('wheel', (e) => {
-                    if (!window.isWebcamPanZoomMode) return;
-                    e.preventDefault();
-                    const scaleAmount = e.deltaY * -0.001;
-                    webcam_transform.scale = Math.min(Math.max(1, webcam_transform.scale + scaleAmount), 5);
-                    if(webcam_transform.scale === 1){ webcam_transform.panX = 0; webcam_transform.panY = 0; }
-                    applyWebcamTransform();
-                    webcamPlayer.savePanZoomState();
-                    clearTimeout(webcamGlowTimeout);
-                    webcamGlowTimeout = setTimeout(toggleWebcamPanZoomMode, 15000);
-                }, { passive: false });
-
-                let isPanning = false;
-                let startPanPos = { x: 0, y: 0 };
-                let startTransform = { x: 0, y: 0 };
-
-                videoWrapper.addEventListener('pointerdown', (e) => {
-                    if (!window.isWebcamPanZoomMode || webcam_transform.scale <= 1) return;
-                    e.preventDefault();
-                    isPanning = true;
-                    startPanPos = { x: e.clientX, y: e.clientY };
-                    startTransform = { x: webcam_transform.panX, y: webcam_transform.panY };
-                    videoWrapper.setPointerCapture(e.pointerId);
-                    videoWrapper.classList.add('panning');
-                });
-                
-                videoWrapper.addEventListener('pointermove', (e) => {
-                    if (!isPanning) return;
-                    const dx = e.clientX - startPanPos.x; const dy = e.clientY - startPanPos.y;
-                    const maxPanX = (canvasEl.clientWidth * webcam_transform.scale - canvasEl.clientWidth) / (2 * webcam_transform.scale);
-                    const maxPanY = (canvasEl.clientHeight * webcam_transform.scale - canvasEl.clientHeight) / (2 * webcam_transform.scale);
-                    webcam_transform.panX = Math.min(Math.max(startTransform.x + dx / webcam_transform.scale, -maxPanX), maxPanX);
-                    webcam_transform.panY = Math.min(Math.max(startTransform.y + dy / webcam_transform.scale, -maxPanY), maxPanY);
-                    applyWebcamTransform();
-                });
-                
-                videoWrapper.addEventListener('pointerup', (e) => {
-                    if (!isPanning) return;
-                    isPanning = false;
-                    videoWrapper.releasePointerCapture(e.pointerId);
-                    videoWrapper.classList.remove('panning');
-                    webcamPlayer.savePanZoomState();
-                    clearTimeout(webcamGlowTimeout);
-                    webcamGlowTimeout = setTimeout(toggleWebcamPanZoomMode, 15000);
-                });
-                
-                portraitBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    isWebcamPortraitMode = !isWebcamPortraitMode;
-                    const currentWidth = webcamWidget.offsetWidth;
-                    const newWidth = currentWidth * (isWebcamPortraitMode ? 0.6 : 1.67);
-                    webcamWidget.style.width = `${Math.round(newWidth)}px`;
-                    webcamWidget.style.height = `${Math.round(newWidth * (isWebcamPortraitMode ? 16 / 9 : 9 / 16))}px`;
-                    portraitBtn.textContent = isWebcamPortraitMode ? 'Full' : '9:16';
-                    showPortraitBtn(); // Keep it visible after click
-                });
-                
-                const toggleBtn = document.getElementById('webcam-toggle-btn');
-                toggleBtn.addEventListener('click', () => {
-                    if (toggleBtn.hasMoved) return;
-                    if (webcamPlayer.stream) {
-                        webcamPlayer.stop();
-                    } else {
-                        webcamPlayer.populateDevices(true);
-                    }
-                });
                 
                 (function setupWidgets() {
                     const noteWidget = document.getElementById('note-widget');
@@ -830,6 +748,7 @@
                             { name: 'SomaFM: Vaporwaves', genre: 'Hypnagogic Retro', streamUrl: 'https://ice1.somafm.com/vaporwaves-128-mp3' }
                         ],
                         currentStationIndex: -1,
+                        currentArtworkUrl: '',
                         audio: document.getElementById('audio-player'),
                         elements: {
                             widget: document.getElementById('music-widget'),
@@ -851,30 +770,39 @@
                             this.elements.prev.addEventListener('click', () => this.playPrev());
                             this.audio.addEventListener('play', () => this.updatePlayState(true));
                             this.audio.addEventListener('pause', () => this.updatePlayState(false));
+                            this.elements.art.style.backgroundImage = 'none';
                             this.elements.art.innerHTML = '<i class="fa-solid fa-headphones"></i>';
                             this.setupMediaSession();
                         },
+                        updateAlbumArt(artUrl) {
+                            if (artUrl) this.currentArtworkUrl = artUrl;
+                            // Don't show wallpaper in music widget - keep default music icon
+                            this.elements.art.innerHTML = '<i class="fa-solid fa-headphones"></i>';
+                            this.elements.art.style.backgroundImage = 'none';
+                            // Still send artwork to media session API for system controls
+                            if (this.currentStationIndex !== -1 && 'mediaSession' in navigator) {
+                                const station = this.stations[this.currentStationIndex];
+                                navigator.mediaSession.metadata = new MediaMetadata({
+                                    title: station.name,
+                                    artist: station.genre,
+                                    artwork: [{ src: this.currentArtworkUrl, sizes: '512x512', type: 'image/jpeg' }]
+                                });
+                            }
+                        },
                         updatePlayState(isPlaying) { this.elements.playPause.className = `fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`; },
                         togglePlay() { if (this.currentStationIndex !== -1) this.audio.paused ? this.audio.play() : this.audio.pause(); },
-                        playNext() { 
-                            const newIndex = this.currentStationIndex < 0 ? 0 : (this.currentStationIndex + 1) % this.stations.length;
-                            this.loadStation(newIndex);
-                        },
-                        playPrev() { 
-                            const newIndex = this.currentStationIndex < 0 ? 0 : (this.currentStationIndex - 1 + this.stations.length) % this.stations.length;
-                            this.loadStation(newIndex);
-                        },
+                        playNext() { this.loadStation((this.currentStationIndex + 1) % this.stations.length); },
+                        playPrev() { this.loadStation((this.currentStationIndex - 1 + this.stations.length) % this.stations.length); },
                         loadStation(index) {
                             if (this.currentStationIndex === index && !this.audio.paused) return;
                             this.currentStationIndex = index;
                             const station = this.stations[index];
                             this.elements.widget.classList.remove('no-station');
-                            this.elements.art.innerHTML = '<i class="fa-solid fa-tower-broadcast"></i>';
                             this.elements.title.textContent = station.name;
                             this.elements.artist.textContent = station.genre;
                             this.audio.src = station.streamUrl;
                             this.audio.play().catch(e => console.error("Audio play failed:", e));
-                            updateMediaSessionArt();
+                            this.updateAlbumArt(); 
                         },
                         openRadioMenu() {
                             this.elements.radioChannelList.innerHTML = '';
@@ -891,7 +819,9 @@
                             this.audio.pause(); this.audio.src = ''; this.currentStationIndex = -1;
                             this.elements.widget.classList.add('no-station');
                             this.elements.title.textContent = 'No Station Loaded'; this.elements.artist.textContent = 'Double click to select';
-                            this.elements.art.innerHTML = '<i class="fa-solid fa-headphones"></i>'; this.updatePlayState(false);
+                            this.elements.art.style.backgroundImage = 'none';
+                            this.elements.art.innerHTML = '<i class="fa-solid fa-headphones"></i>';
+                            this.updatePlayState(false);
                             if (navigator.mediaSession) navigator.mediaSession.metadata = null;
                         },
                         setupMediaSession() {
@@ -994,50 +924,703 @@
                     closeGifChooserBtn.addEventListener('click', () => gifChooserMenu.classList.remove('visible'));
                     window.addGif = addGif;
                     renderCurrentGif();
+                    
+                    // =================================================================
+                    // CORRECTED WEBCAM WIDGET LOGIC
+                    // =================================================================
+                    
+                    const webcamWidget = document.getElementById('webcam-widget');
+                    const videoWrapper = webcamWidget.querySelector('.webcam-video-wrapper');
+                    const canvasEl = webcamWidget.querySelector('#webcam-canvas');
+                    const portraitBtn = document.getElementById('webcam-portrait-btn');
+                    let isWebcamPortraitMode = false; // Renamed for clarity
+                    let webcamPortraitBtnTimer = null;
+                    let webcam_transform = { scale: 1, panX: 0, panY: 0 };
+                    let webcamClickTimer = null;
+                    let webcamGlowTimeout = null;
+                    
+                    const webcamPlayer = {
+                        stream: null,
+                        animationFrameId: null,
+                        elements: {
+                            widget: webcamWidget,
+                            videoWrapper: videoWrapper,
+                            video: webcamWidget.querySelector('#webcam-video-source'),
+                            canvas: canvasEl,
+                            canvasContext: canvasEl.getContext('2d'),
+                            select: webcamWidget.querySelector('#webcam-source-select'),
+                            stopBtn: webcamWidget.querySelector('#webcam-stop-btn'),
+                            placeholder: webcamWidget.querySelector('#webcam-placeholder'),
+                            toggleIcon: document.querySelector('#webcam-toggle-btn i'),
+                        },
+                        init() {
+                            this.elements.widget.style.display = 'none';
+                            this.elements.select.addEventListener('change', () => this.start());
+                            this.elements.stopBtn.addEventListener('click', () => this.stop());
+                            if (!this.elements.widget.classList.contains('hidden')) {
+                                this.populateDevices();
+                            }
+                        },
+                        drawToCanvas() {
+                            if (!this.stream || !this.stream.active) return;
+                            const video = this.elements.video;
+                            const canvas = this.elements.canvas;
+                            const ctx = this.elements.canvasContext;
+                            
+                            if (!video.videoWidth || !video.videoHeight) {
+                                this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas());
+                                return;
+                            }
+                            
+                            if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+                                canvas.width = canvas.clientWidth;
+                                canvas.height = canvas.clientHeight;
+                            }
+                            if (canvas.width === 0 || canvas.height === 0) {
+                                this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas());
+                                return;
+                            }
+                            
+                            let vWidth = video.videoWidth, vHeight = video.videoHeight;
+                            let sx = 0, sy = 0, sWidth = vWidth, sHeight = vHeight;
+                            
+                            if (isWebcamPortraitMode) {
+                                // Portrait mode: crop to 9:16 ratio
+                                const targetRatio = 9 / 16;
+                                const videoRatio = vWidth / vHeight;
+                                if (videoRatio > targetRatio) {
+                                    sWidth = vHeight * targetRatio;
+                                    sx = (vWidth - sWidth) / 2;
+                                } else {
+                                    sHeight = vWidth / targetRatio;
+                                    sy = (vHeight - sHeight) / 2;
+                                }
+                            } else {
+                                // Default mode: crop 20% from bottom to remove chin/desk area
+                                sHeight = vHeight * 0.8;
+                                sy = 0;
+                            }
 
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+                            this.animationFrameId = requestAnimationFrame(() => this.drawToCanvas());
+                        },
+                        async populateDevices(shouldAutoload = false) {
+                            try {
+                                const devices = await navigator.mediaDevices.enumerateDevices();
+                                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                                const currentDeviceId = this.stream ? this.stream.getVideoTracks()[0].getSettings().deviceId : null;
+                                this.elements.select.innerHTML = '';
+                                if (videoDevices.length === 0) {
+                                    this.elements.select.innerHTML = '<option value="">No cameras</option>';
+                                    this.stop();
+                                    return;
+                                }
+                                videoDevices.forEach((device) => {
+                                    const option = document.createElement('option');
+                                    option.value = device.deviceId;
+                                    option.textContent = device.label || `Camera ${videoDevices.indexOf(device) + 1}`;
+                                    this.elements.select.appendChild(option);
+                                });
+                                if (currentDeviceId && this.elements.select.querySelector(`option[value="${currentDeviceId}"]`)) {
+                                    this.elements.select.value = currentDeviceId;
+                                }
+                                if (shouldAutoload && !this.stream && videoDevices.length > 0) {
+                                    this.elements.select.value = videoDevices[0].deviceId;
+                                    this.start();
+                                }
+                            } catch (err) {
+                                console.error("Error enumerating devices:", err);
+                                this.elements.placeholder.querySelector('span').textContent = "Device Error";
+                            }
+                        },
+                        async start() {
+                            if (this.stream) {
+                                if (this.stream.getVideoTracks()[0].getSettings().deviceId === this.elements.select.value) return;
+                                this.stop(true);
+                            }
+                            this.elements.widget.classList.remove('hidden');
+                            const webcamToggleBtn = document.getElementById('webcam-toggle-btn');
+                            if (webcamToggleBtn) webcamToggleBtn.classList.remove('hidden');
+                            this.elements.widget.style.display = 'flex';
+                            const deviceId = this.elements.select.value;
+                            if (!deviceId) { this.stop(); return; }
+                            const constraints = { video: { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } } };
+                            try {
+                                this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                                this.elements.video.srcObject = this.stream;
+                                this.elements.video.onloadedmetadata = () => {
+                                    this.elements.video.play();
+                                    this.elements.widget.classList.add('active');
+                                    if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video';
+                                    this.drawToCanvas();
+                                };
+                                this.populateDevices(false);
+                            } catch (err) {
+                                console.error(`Error starting camera:`, err);
+                                this.elements.widget.classList.remove('active');
+                                this.elements.placeholder.querySelector('span').textContent = "Access Denied";
+                                this.stop();
+                            }
+                        },
+                        stop(isRestarting = false) {
+                            if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                            this.animationFrameId = null;
+                            if (this.stream) this.stream.getTracks().forEach(track => track.stop());
+                            this.stream = null;
+                            this.elements.video.srcObject = null;
+                            if (this.elements.canvasContext) this.elements.canvasContext.clearRect(0, 0, this.elements.canvas.width, this.elements.canvas.height);
+                            this.elements.widget.classList.remove('active');
+                            if (this.elements.toggleIcon) this.elements.toggleIcon.className = 'fa-solid fa-video-slash';
+                            if (!isRestarting) this.elements.widget.style.display = 'none';
+                        },
+                                            savePanZoomState() { localStorage.setItem('webcamPanZoomState', JSON.stringify(webcam_transform)); },
+                    loadPanZoomState() {
+                        const state = localStorage.getItem('webcamPanZoomState');
+                        if (state) {
+                            try {
+                                const obj = JSON.parse(state);
+                                if (typeof obj.scale === 'number' && typeof obj.panX === 'number' && typeof obj.panY === 'number') {
+                                    webcam_transform = obj;
+                                    applyWebcamTransform();
+                                }
+                            } catch {}
+                        }
+                    },
+                    saveAllWebcamState() {
+                        const state = {
+                            position: {
+                                top: webcamWidget.style.top || webcamWidget.offsetTop + 'px',
+                                left: webcamWidget.style.left || webcamWidget.offsetLeft + 'px'
+                            },
+                            size: {
+                                width: webcamWidget.style.width || webcamWidget.offsetWidth + 'px',
+                                height: webcamWidget.style.height || webcamWidget.offsetHeight + 'px'
+                            },
+                            portraitMode: isWebcamPortraitMode,
+                            panZoom: webcam_transform
+                        };
+                        localStorage.setItem('webcamFullState', JSON.stringify(state));
+                    },
+                    loadAllWebcamState() {
+                        const state = localStorage.getItem('webcamFullState');
+                        if (state) {
+                            try {
+                                const obj = JSON.parse(state);
+                                
+                                // Restore position
+                                if (obj.position) {
+                                    webcamWidget.style.top = obj.position.top;
+                                    webcamWidget.style.left = obj.position.left;
+                                }
+                                
+                                // Restore size
+                                if (obj.size) {
+                                    webcamWidget.style.width = obj.size.width;
+                                    webcamWidget.style.height = obj.size.height;
+                                }
+                                
+                                // Restore portrait mode
+                                if (typeof obj.portraitMode === 'boolean') {
+                                    isWebcamPortraitMode = obj.portraitMode;
+                                    if (portraitBtn) {
+                                        portraitBtn.textContent = isWebcamPortraitMode ? 'Full' : '9:16';
+                                    }
+                                }
+                                
+                                // Restore pan/zoom
+                                if (obj.panZoom && typeof obj.panZoom.scale === 'number') {
+                                    webcam_transform = obj.panZoom;
+                                    applyWebcamTransform();
+                                }
+                            } catch {}
+                        }
+                    }
+                    };
+                    window.webcamPlayer = webcamPlayer;
+                    webcamPlayer.init();
+                    
+                    // Load saved state when page loads
+                    webcamPlayer.loadAllWebcamState();
+
+                    function applyWebcamTransform() {
+                        canvasEl.style.transform = `translate(${webcam_transform.panX}px, ${webcam_transform.panY}px) scale(${webcam_transform.scale})`;
+                        updateWebcamCursor();
+                    }
+                    
+                    function updateWebcamCursor() {
+                        if (window.isWebcamPanZoomMode) {
+                            if (webcam_transform.scale > 1) {
+                                videoWrapper.style.cursor = 'grab';
+                            } else {
+                                videoWrapper.style.cursor = 'zoom-in';
+                            }
+                        }
+                    }
+
+                    function updatePortraitBtnPosition() {
+                        const rect = webcamWidget.getBoundingClientRect();
+                        const left = rect.left + (rect.width / 2) - (portraitBtn.offsetWidth / 2);
+                        const top = rect.bottom + 10;
+                        portraitBtn.style.left = `${left}px`;
+                        portraitBtn.style.top = `${top}px`;
+                    }
+
+                    function showPortraitBtn() {
+                        updatePortraitBtnPosition();
+                        portraitBtn.style.opacity = '1';
+                        portraitBtn.style.pointerEvents = 'auto';
+                        clearTimeout(webcamPortraitBtnTimer);
+                        webcamPortraitBtnTimer = setTimeout(hidePortraitBtn, 10000);
+                    }
+
+                    function hidePortraitBtn() {
+                        portraitBtn.style.opacity = '0';
+                        portraitBtn.style.pointerEvents = 'none';
+                    }
+
+                    function updatePortraitBtnVisibility() {
+                        if (window.isWebcamPanZoomMode) {
+                            showPortraitBtn();
+                        } else {
+                            hidePortraitBtn();
+                        }
+                    }
+
+                    function toggleWebcamPanZoomMode() {
+                        window.isWebcamPanZoomMode = !window.isWebcamPanZoomMode;
+                        webcamWidget.classList.toggle('webcam-pan-zoom-active', window.isWebcamPanZoomMode);
+                        if (window.isWebcamPanZoomMode) {
+                            webcamPlayer.loadPanZoomState();
+                            clearTimeout(webcamGlowTimeout);
+                            webcamGlowTimeout = setTimeout(() => {
+                                webcamWidget.classList.remove('webcam-pan-zoom-active');
+                                window.isWebcamPanZoomMode = false;
+                                updatePortraitBtnVisibility();
+                            }, 15000);
+                        } else {
+                            clearTimeout(webcamGlowTimeout);
+                        }
+                        updatePortraitBtnVisibility();
+                        updateWebcamCursor();
+                    }
+
+                    // --- IMPROVED DOUBLE-CLICK/TAP TO ENTER/EXIT MODE ---
+                    let webcamTapCount = 0;
+                    let webcamTapTimer = null;
+                    
+                    // Mouse double-click
+                    webcamWidget.addEventListener('dblclick', (e) => {
+                        if (e.target.closest('#webcam-controls, #webcam-portrait-btn')) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWebcamPanZoomMode();
+                    });
+
+                    // Improved touch double-tap detection
+                    webcamWidget.addEventListener('touchstart', (e) => {
+                        if (e.target.closest('#webcam-controls, #webcam-portrait-btn')) return;
+                        if (e.touches.length !== 1) return; // Only single finger taps
+                        
+                        webcamTapCount++;
+                        
+                        if (webcamTapCount === 1) {
+                            webcamTapTimer = setTimeout(() => {
+                                webcamTapCount = 0; // Reset if second tap doesn't come
+                            }, 400); // 400ms window for double tap
+                        } else if (webcamTapCount === 2) {
+                            clearTimeout(webcamTapTimer);
+                            webcamTapCount = 0;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleWebcamPanZoomMode();
+                        }
+                    });
+
+                    let resizeGestureState = {}; // Declare here for use in touchend handler
+                    
+                    webcamWidget.addEventListener('touchend', (e) => {
+                        if (e.target.closest('#webcam-controls, #webcam-portrait-btn')) return;
+                        
+                        // Handle pinch resize end
+                        if (e.touches.length < 2) {
+                            resizeGestureState = {};
+                        }
+                    });
+
+                    portraitBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        isWebcamPortraitMode = !isWebcamPortraitMode;
+                        
+                        // Resize the webcam widget based on mode
+                        const currentWidth = webcamWidget.offsetWidth;
+                        if (isWebcamPortraitMode) {
+                            // Switch to portrait: make it narrower and taller
+                            const newWidth = Math.round(currentWidth * 0.6);
+                            webcamWidget.style.width = `${newWidth}px`;
+                            webcamWidget.style.height = `${Math.round(newWidth * 16 / 9)}px`;
+                        } else {
+                            // Switch back to landscape: make it wider and shorter  
+                            const newWidth = Math.round(currentWidth * 1.67);
+                            webcamWidget.style.width = `${newWidth}px`;
+                            webcamWidget.style.height = `${Math.round(newWidth * 9 / 16)}px`;
+                        }
+                        
+                        // Recalculate and clamp pan position after resize
+                        setTimeout(() => {
+                            if (webcam_transform.scale > 1) {
+                                const rect = videoWrapper.getBoundingClientRect();
+                                const max_panX = (rect.width * webcam_transform.scale - rect.width) / 2;
+                                const max_panY = (rect.height * webcam_transform.scale - rect.height) / 2;
+                                webcam_transform.panX = Math.max(-max_panX, Math.min(max_panX, webcam_transform.panX));
+                                webcam_transform.panY = Math.max(-max_panY, Math.min(max_panY, webcam_transform.panY));
+                                applyWebcamTransform();
+                                webcamPlayer.savePanZoomState();
+                            }
+                        }, 10); // Small delay to let resize complete
+                        
+                        portraitBtn.textContent = isWebcamPortraitMode ? 'Full' : '9:16';
+                        showPortraitBtn(); // Reset the hide timer
+                        
+                        // Save all webcam state after portrait change
+                        webcamPlayer.saveAllWebcamState();
+                    });
+
+                    // Watch for any manual size changes and correct aspect ratio
+                    const observer = new MutationObserver((mutations) => {
+                        updatePortraitBtnPosition();
+                        
+                        // Check if size was changed manually and correct aspect ratio
+                        mutations.forEach(mutation => {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                setTimeout(() => {
+                                    const currentWidth = webcamWidget.offsetWidth;
+                                    const currentHeight = webcamWidget.offsetHeight;
+                                    let correctHeight;
+                                    
+                                    if (isWebcamPortraitMode) {
+                                        // Portrait mode: should be 9:16 ratio (taller)
+                                        correctHeight = Math.round(currentWidth * 16 / 9);
+                                    } else {
+                                        // Landscape mode: should be 16:9 ratio (wider)
+                                        correctHeight = Math.round(currentWidth * 9 / 16);
+                                    }
+                                    
+                                    // Only adjust if significantly different (avoid infinite loops)
+                                    if (Math.abs(currentHeight - correctHeight) > 5) {
+                                        webcamWidget.style.height = `${correctHeight}px`;
+                                        // Save state after size correction
+                                        setTimeout(() => webcamPlayer.saveAllWebcamState(), 100);
+                                    }
+                                }, 0);
+                            }
+                        });
+                    });
+                    observer.observe(webcamWidget, { attributes: true, attributeFilter: ['style', 'class'] });
+
+                    // The rest of the pan/zoom logic remains the same
+                    // It correctly listens on videoWrapper, canvasEl, and document for gestures.
+                    const get_touch_dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+                    let webcamPanMouse = { isDown: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0 };
+                    let webcamWidgetDragInProgress = false;
+                    
+                    // Mirror toggle only available in pan/zoom mode via long press
+                    let webcamMirrorTimer = null;
+                    let webcamMirrorStartPos = { x: 0, y: 0 };
+                    
+                    function startWebcamMirrorInPanMode(e) {
+                        if (!window.isWebcamPanZoomMode) return;
+                        
+                        // Record starting position for movement tolerance
+                        const isTouch = !!e.touches;
+                        webcamMirrorStartPos.x = isTouch ? e.touches[0].clientX : e.clientX;
+                        webcamMirrorStartPos.y = isTouch ? e.touches[0].clientY : e.clientY;
+                        
+                        webcamMirrorTimer = setTimeout(() => {
+                            // Check if we haven't moved too much
+                            videoWrapper.classList.toggle('normal-view');
+                            // Visual feedback
+                            videoWrapper.style.filter = 'brightness(1.3)';
+                            setTimeout(() => videoWrapper.style.filter = '', 150);
+                            
+                            // Haptic feedback if available
+                            if (navigator.vibrate) {
+                                navigator.vibrate(50);
+                            }
+                        }, 800); // Long press in pan mode
+                    }
+                    
+                    function checkWebcamMirrorMoveInPanMode(e) {
+                        if (!webcamMirrorTimer) return;
+                        
+                        const isTouch = !!e.touches;
+                        const currentX = isTouch ? e.touches[0].clientX : e.clientX;
+                        const currentY = isTouch ? e.touches[0].clientY : e.clientY;
+                        
+                        const moveDistance = Math.hypot(
+                            currentX - webcamMirrorStartPos.x,
+                            currentY - webcamMirrorStartPos.y
+                        );
+                        
+                        // Cancel mirror if movement is too much
+                        if (moveDistance > 20) {
+                            clearTimeout(webcamMirrorTimer);
+                            webcamMirrorTimer = null;
+                        }
+                    }
+                    
+                    function cancelWebcamMirrorInPanMode() {
+                        if (webcamMirrorTimer) {
+                            clearTimeout(webcamMirrorTimer);
+                            webcamMirrorTimer = null;
+                        }
+                    }
+                    
+                    videoWrapper.addEventListener('wheel', (e) => {
+                        if (!window.isWebcamPanZoomMode) return;
+                        e.preventDefault();
+                        let scale = webcam_transform.scale * (e.deltaY < 0 ? 1.08 : 1 / 1.08);
+                        webcam_transform.scale = Math.max(1, Math.min(5, scale));
+                        
+                        // Apply bounds checking after zoom and reset pan if zoomed fully out
+                        if (webcam_transform.scale > 1) {
+                            const rect = videoWrapper.getBoundingClientRect();
+                            const max_panX = (rect.width * webcam_transform.scale - rect.width) / 2;
+                            const max_panY = (rect.height * webcam_transform.scale - rect.height) / 2;
+                            webcam_transform.panX = Math.max(-max_panX, Math.min(max_panX, webcam_transform.panX));
+                            webcam_transform.panY = Math.max(-max_panY, Math.min(max_panY, webcam_transform.panY));
+                        } else {
+                            // Reset pan position when fully zoomed out
+                            webcam_transform.panX = 0;
+                            webcam_transform.panY = 0;
+                        }
+                        
+                        applyWebcamTransform();
+                        webcamPlayer.savePanZoomState();
+                    }, { passive: false });
+                    
+                    webcamWidget.addEventListener('mousedown', (e) => {
+                        if (window.isWebcamPanZoomMode) return; // Don't stop propagation - let videoWrapper handle it
+                        webcamWidgetDragInProgress = false;
+                        const sX = e.clientX, sY = e.clientY;
+                        const move = () => webcamWidgetDragInProgress = true;
+                        const up = () => {
+                            document.removeEventListener('mousemove', move);
+                            document.removeEventListener('mouseup', up);
+                        };
+                        document.addEventListener('mousemove', move, { once: true });
+                        document.addEventListener('mouseup', up, { once: true });
+                    }, true);
+
+                    // Pinch resize when NOT in zoom mode
+                    webcamWidget.addEventListener('touchstart', (e) => {
+                        if (window.isWebcamPanZoomMode) return; // Only when NOT in zoom mode
+                        if (e.touches.length === 2) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            resizeGestureState.initialDist = get_touch_dist(e.touches);
+                            resizeGestureState.initialWidth = webcamWidget.offsetWidth;
+                        }
+                    }, { passive: false });
+                    
+                    webcamWidget.addEventListener('touchmove', (e) => {
+                        if (window.isWebcamPanZoomMode || !resizeGestureState.initialDist) return;
+                        if (e.touches.length === 2) {
+                            e.preventDefault();
+                            const currentDist = get_touch_dist(e.touches);
+                            const scaleRatio = currentDist / resizeGestureState.initialDist;
+                            let newWidth = Math.max(120, Math.min(800, resizeGestureState.initialWidth * scaleRatio));
+                            webcamWidget.style.width = `${Math.round(newWidth)}px`;
+                            // Use correct aspect ratio based on current mode
+                            if (isWebcamPortraitMode) {
+                                // Portrait mode: 9:16 ratio (taller)
+                                webcamWidget.style.height = `${Math.round(newWidth * 16 / 9)}px`;
+                            } else {
+                                // Landscape mode: 16:9 ratio (wider)
+                                webcamWidget.style.height = `${Math.round(newWidth * 9 / 16)}px`;
+                            }
+                            // Save state after pinch resize
+                            webcamPlayer.saveAllWebcamState();
+                        }
+                    }, { passive: false });
+                    
+
+
+                    // Pan/zoom mode touch gestures (only when in zoom mode)
+                    let touchGestureState = {};
+                    videoWrapper.addEventListener('touchstart', (e) => {
+                        if (!window.isWebcamPanZoomMode) return;
+                        cancelWebcamMirrorInPanMode(); // Cancel any ongoing mirror
+                        e.stopPropagation();
+                        touchGestureState.startTransform = { ...webcam_transform };
+                        if (e.touches.length === 1) {
+                            touchGestureState.startTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                            // Start mirror timer for single touch
+                            startWebcamMirrorInPanMode(e);
+                        } else if (e.touches.length === 2) {
+                            touchGestureState.initialPinchDist = get_touch_dist(e.touches);
+                        }
+                    }, { passive: false });
+
+                    videoWrapper.addEventListener('touchmove', (e) => {
+                        if (!window.isWebcamPanZoomMode || !touchGestureState.startTransform) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Check for mirror gesture movement cancellation
+                        checkWebcamMirrorMoveInPanMode(e);
+                        
+                        if (e.touches.length === 2 && touchGestureState.initialPinchDist) {
+                            webcam_transform.scale = Math.max(1.0, touchGestureState.startTransform.scale * (get_touch_dist(e.touches) / touchGestureState.initialPinchDist));
+                        } else if (e.touches.length === 1 && touchGestureState.startTouch && webcam_transform.scale > 1) {
+                            const dx = e.touches[0].clientX - touchGestureState.startTouch.x;
+                            const dy = e.touches[0].clientY - touchGestureState.startTouch.y;
+                            
+                            // Reverse X direction when mirrored (not normal-view)
+                            const isMirrored = !videoWrapper.classList.contains('normal-view');
+                            const adjustedDx = isMirrored ? -dx : dx;
+                            
+                            webcam_transform.panX = touchGestureState.startTransform.panX + adjustedDx;
+                            webcam_transform.panY = touchGestureState.startTransform.panY + dy;
+                        }
+                        // Apply bounds checking when zoomed in
+                        if (webcam_transform.scale > 1) {
+                            const rect = videoWrapper.getBoundingClientRect();
+                            const max_panX = (rect.width * webcam_transform.scale - rect.width) / 2;
+                            const max_panY = (rect.height * webcam_transform.scale - rect.height) / 2;
+                            webcam_transform.panX = Math.max(-max_panX, Math.min(max_panX, webcam_transform.panX));
+                            webcam_transform.panY = Math.max(-max_panY, Math.min(max_panY, webcam_transform.panY));
+                        }
+                        applyWebcamTransform();
+                    }, { passive: false });
+
+                    videoWrapper.addEventListener('touchend', () => {
+                        if (!window.isWebcamPanZoomMode) return;
+                        cancelWebcamMirrorInPanMode(); // Cancel mirror timer on touch end
+                        if(touchGestureState.startTransform) webcamPlayer.savePanZoomState();
+                        touchGestureState = {};
+                    });
+
+                    // Mouse panning and mirror toggle in pan mode
+                    videoWrapper.addEventListener('mousedown', (e) => {
+                        if (!window.isWebcamPanZoomMode) return;
+                        
+                        cancelWebcamMirrorInPanMode(); // Cancel any ongoing mirror
+                        
+                        if (webcam_transform.scale <= 1) {
+                            // When not zoomed, only allow mirror toggle
+                            startWebcamMirrorInPanMode(e);
+                            return;
+                        }
+                        
+                        // When zoomed in, allow panning
+                        e.preventDefault();
+                        e.stopPropagation();
+                        webcamPanMouse = { isDown: true, startX: e.clientX, startY: e.clientY, startPanX: webcam_transform.panX, startPanY: webcam_transform.panY };
+                        videoWrapper.classList.add('panning'); // Show grabbing cursor
+                        document.addEventListener('mousemove', webcamPanMouseMove);
+                        document.addEventListener('mouseup', webcamPanMouseUp, { once: true });
+                    });
+
+                    function webcamPanMouseMove(e) {
+                        if (!webcamPanMouse.isDown || webcam_transform.scale <= 1) return; // Don't pan when not zoomed
+                        
+                        const deltaX = e.clientX - webcamPanMouse.startX;
+                        const deltaY = e.clientY - webcamPanMouse.startY;
+                        
+                        // Reverse X direction when mirrored (not normal-view)
+                        const isMirrored = !videoWrapper.classList.contains('normal-view');
+                        const adjustedDeltaX = isMirrored ? -deltaX : deltaX;
+                        
+                        webcam_transform.panX = webcamPanMouse.startPanX + adjustedDeltaX;
+                        webcam_transform.panY = webcamPanMouse.startPanY + deltaY;
+                        
+                        // Apply bounds checking to keep within visible area
+                        const rect = videoWrapper.getBoundingClientRect();
+                        const max_panX = (rect.width * webcam_transform.scale - rect.width) / 2;
+                        const max_panY = (rect.height * webcam_transform.scale - rect.height) / 2;
+                        webcam_transform.panX = Math.max(-max_panX, Math.min(max_panX, webcam_transform.panX));
+                        webcam_transform.panY = Math.max(-max_panY, Math.min(max_panY, webcam_transform.panY));
+                        
+                        applyWebcamTransform();
+                    }
+
+                    function webcamPanMouseUp() {
+                        if (webcamPanMouse.isDown) {
+                            webcamPanMouse.isDown = false;
+                            videoWrapper.classList.remove('panning'); // Remove grabbing cursor
+                            webcamPlayer.savePanZoomState();
+                            document.removeEventListener('mousemove', webcamPanMouseMove);
+                        }
+                    }
+
+                    // Mouse events for mirror toggle in pan mode (when not zoomed)
+                    videoWrapper.addEventListener('mousemove', (e) => {
+                        if (window.isWebcamPanZoomMode && webcam_transform.scale <= 1) {
+                            checkWebcamMirrorMoveInPanMode(e);
+                        }
+                    });
+
+                    videoWrapper.addEventListener('mouseup', () => {
+                        if (window.isWebcamPanZoomMode && webcam_transform.scale <= 1) {
+                            cancelWebcamMirrorInPanMode();
+                        }
+                    });
                 })();
                 
                 (function setupBaseFeatures() {
-                    const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'];
+                    const webcamToggleBtn = document.getElementById('webcam-toggle-btn');
+                    const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'];
                     const WIDGETS = {
-                        note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: true },
-                        music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: true },
-                        gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: true },
-                        camera: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-camera-widget'), default: true, extraEl: document.getElementById('webcam-toggle-btn') }
+                        stock: { el: document.getElementById('stock-widget'), toggle: document.getElementById('toggle-stock-widget'), default: true },
+                        note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: false },
+                        music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: false },
+                        gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: false },
+                        webcam: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-webcam-widget'), default: false },
                     };
                     
                     function initializeWidgetToggles() {
                         for(const key in WIDGETS) {
                             const widget = WIDGETS[key];
                             const savedState = localStorage.getItem(`widget_${key}_visible`);
-                            const isEnabledInSettings = savedState === null ? widget.default : savedState === 'true';
-                            widget.toggle.checked = isEnabledInSettings;
+                            const isVisible = savedState === null ? widget.default : savedState === 'true';
                             
-                            if (key === 'camera') {
-                                if (widget.extraEl) {
-                                    widget.extraEl.classList.toggle('hidden', !isEnabledInSettings);
+                            widget.el.classList.toggle('hidden', !isVisible);
+                            widget.toggle.checked = isVisible;
+
+                            if (key === 'webcam') {
+                                webcamToggleBtn.classList.toggle('hidden', !isVisible);
+                                if (isVisible && document.getElementById('toggle-webcam-widget').checked) {
+                                    window.webcamPlayer.populateDevices();
                                 }
-                            } else {
-                                widget.el.classList.toggle('hidden', !isEnabledInSettings);
                             }
-                    
+
                             widget.toggle.addEventListener('change', () => {
                                 const isChecked = widget.toggle.checked;
+                                widget.el.classList.toggle('hidden', !isChecked);
                                 localStorage.setItem(`widget_${key}_visible`, isChecked);
-                                if (widget.extraEl) {
-                                    widget.extraEl.classList.toggle('hidden', !isChecked);
-                                }
-                                if (key === 'camera') {
-                                    if (!isChecked && webcamPlayer.stream) {
-                                        webcamPlayer.stop();
+
+                                if (key === 'webcam') {
+                                    webcamToggleBtn.classList.toggle('hidden', !isChecked);
+                                    if (isChecked) {
+                                        window.webcamPlayer.populateDevices();
+                                    } else {
+                                        window.webcamPlayer.stop();
                                     }
-                                } else {
-                                    widget.el.classList.toggle('hidden', !isChecked);
                                 }
                             });
                         }
                     }
                     initializeWidgetToggles();
+                    webcamToggleBtn.addEventListener('click', (e) => {
+                        const btn = e.currentTarget;
+                        if (btn.hasMoved) return;
+                        if (window.webcamPlayer.stream) {
+                            window.webcamPlayer.stop();
+                        } else {
+                            window.webcamPlayer.start();
+                        }
+                    });
 
                     const timeElems = { h: document.getElementById('hours'), m: document.getElementById('minutes'), d: document.getElementById('date') };
                     const weatherElems = { t: document.getElementById('temperature'), i: document.getElementById('weather-icon') };
@@ -1075,7 +1658,7 @@
                                 const pos = p[id];
                                 if (e && pos.t && pos.l) {
                                     e.style.top = pos.t; e.style.left = pos.l;
-                                    e.style.transform = (id === 'clock') ? 'none' : e.style.transform;
+                                    e.style.transform = (id === 'clock' || id === 'stock-widget') ? 'none' : e.style.transform;
                                     if (id === 'clock' && pos.s) applyClockScale(pos.s);
                                     if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget') { e.style.width = pos.w || e.style.width; e.style.height = pos.h || e.style.height; }
                                 }
@@ -1087,90 +1670,253 @@
                         let oX, oY, isD, hasMoved;
                         let isPinching = false, initialPinchDist, initialScale;
                         const getDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+                        
                         const mv = (e) => {
                             if (el.isEditing) return;
                             if (el.id === 'clock' && isPinching && e.touches && e.touches.length === 2) {
-                                e.preventDefault(); const oldWidth = el.offsetWidth, oldHeight = el.offsetHeight, oldLeft = el.offsetLeft, oldTop = el.offsetTop;
+                                e.preventDefault();
+                                const oldWidth = el.offsetWidth, oldHeight = el.offsetHeight, oldLeft = el.offsetLeft, oldTop = el.offsetTop;
                                 const newDist = getDist(e.touches); const scaleRatio = newDist / initialPinchDist; const newScale = Math.max(0.5, Math.min(initialScale * scaleRatio, 3));
                                 applyClockScale(newScale); const newWidth = el.offsetWidth, newHeight = el.offsetHeight; const deltaWidth = newWidth - oldWidth, deltaHeight = newHeight - oldHeight;
                                 el.style.left = `${oldLeft - (deltaWidth / 2)}px`; el.style.top = `${oldTop - (deltaHeight / 2)}px`; return;
                             }
-                            if (!isD) return; e.preventDefault(); hasMoved = true;
-                            const cX = e.touches ? e.touches[0].clientX : e.clientX, cY = e.touches ? e.touches[0].clientY : e.clientY;
+                            if (!isD) return; 
+                            e.preventDefault(); 
+                            hasMoved = true;
+                            
+                            let cX, cY;
+                            if (e.touches && e.touches.length > 0) {
+                                cX = e.touches[0].clientX;
+                                cY = e.touches[0].clientY;
+                            } else {
+                                cX = e.clientX;
+                                cY = e.clientY;
+                            }
+                            
                             let nX = cX - oX, nY = cY - oY;
-                            const sR = lockScreen.getBoundingClientRect(), eR = el.getBoundingClientRect();
-                            nX = Math.max(0, Math.min(nX, sR.width - eR.width)); nY = Math.max(0, Math.min(nY, sR.height - eR.height));
-                            el.style.left = `${nX}px`; el.style.top = `${nY}px`;
-                            if(['clock'].indexOf(el.id) === -1) el.style.transform = 'none';
+                            const sR = lockScreen;
+                            const maxX = sR.clientWidth - el.offsetWidth;
+                            const maxY = sR.clientHeight - el.offsetHeight;
+                            nX = Math.max(0, Math.min(nX, maxX));
+                            nY = Math.max(0, Math.min(nY, maxY));
+                            el.style.left = `${nX}px`; 
+                            el.style.top = `${nY}px`;
+                            if(['clock', 'stock-widget'].indexOf(el.id) === -1) el.style.transform = 'none';
                         };
+                        
                         const stD = (e) => {
                             if (!isD && !isPinching) return;
                             e.target.hasMoved = hasMoved;
-                            isD = false; isPinching = false;
-                            if (hasMoved) { savePos(); }
-                            document.removeEventListener('mousemove', mv); document.removeEventListener('touchmove', mv);
+                            if (el.id === 'fun-stock-name-display' && el.classList.contains('visible')) { 
+                                stockNameFadeOutTimer = setTimeout(() => { el.classList.remove('visible'); }, 3000); 
+                            }
+                            isD = false; 
+                            isPinching = false;
+                            if (hasMoved) {
+                                savePos();
+                                // Also save webcam-specific state if it was the webcam widget that moved
+                                if (el.id === 'webcam-widget') {
+                                    setTimeout(() => webcamPlayer.saveAllWebcamState(), 50);
+                                }
+                            }
+                            document.removeEventListener('mousemove', mv); 
+                            document.removeEventListener('touchmove', mv);
                         };
+                        
                         const sD_longPress = (e) => {
-                            if (window.isWebcamPanZoomMode) return; // Ignore dragging if in pan/zoom mode
+                            if (el.id === 'webcam-widget' && window.isWebcamPanZoomMode) {
+                                return;
+                            }
                             if (el.isEditing) return;
-                            if (e.target.closest('#music-controls, #remove-gif-btn, #note-settings-btn, #webcam-controls, #webcam-portrait-btn')) return;
-                            if (e.touches && e.touches.length === 2 && el.id === 'clock') { isPinching = true; isD = false; initialPinchDist = getDist(e.touches); initialScale = clockScale; return; }
-                            isD = true; hasMoved = false; e.target.hasMoved = false;
-                            const cX = e.touches ? e.touches[0].clientX : e.clientX, cY = e.touches ? e.touches[0].clientY : e.clientY;
-                            oX = cX - el.offsetLeft; oY = cY - el.offsetTop;
+                            if (e.target.closest('#music-controls, #remove-gif-btn, #webcam-controls, #note-settings-btn, #webcam-portrait-btn')) return;
+                            if (e.touches && e.touches.length === 2 && el.id === 'clock') { 
+                                isPinching = true; 
+                                isD = false; 
+                                initialPinchDist = getDist(e.touches); 
+                                initialScale = clockScale; 
+                                return; 
+                            }
+                            
+                            isD = true; 
+                            hasMoved = false; 
+                            e.target.hasMoved = false;
+                            
+                            let cX, cY;
+                            if (e.touches && e.touches.length > 0) {
+                                cX = e.touches[0].clientX;
+                                cY = e.touches[0].clientY;
+                            } else {
+                                cX = e.clientX;
+                                cY = e.clientY;
+                            }
+                            
+                            oX = cX - el.offsetLeft; 
+                            oY = cY - el.offsetTop;
+                            if (el.id === 'fun-stock-name-display' && stockNameFadeOutTimer) { 
+                                clearTimeout(stockNameFadeOutTimer); 
+                                stockNameFadeOutTimer = null; 
+                            }
                             document.addEventListener('mousemove', mv, { passive: false });
                             document.addEventListener('touchmove', mv, { passive: false });
                             document.addEventListener('mouseup', stD, { once: true });
                             document.addEventListener('touchend', stD, { once: true });
                         };
+                        
                         el.addEventListener('mousedown', sD_longPress);
                         el.addEventListener('touchstart', sD_longPress, { passive: false });
-                        const lnk = el.querySelector('a'); if (lnk) { lnk.addEventListener('click', (e) => { if (hasMoved) e.preventDefault(); }); }
-                        if(el.id === 'settings-btn') { el.addEventListener('click', (e) => { if (!hasMoved) { showWallpaperSettings(); settingsMenu.classList.add('visible'); } }); }
+                        const lnk = el.querySelector('a'); 
+                        if (lnk) { 
+                            lnk.addEventListener('click', (e) => { if (hasMoved) e.preventDefault(); }); 
+                        }
+                        if(el.id === 'settings-btn') { 
+                            el.addEventListener('click', (e) => { if (!hasMoved) { showWallpaperSettings(); settingsMenu.classList.add('visible'); } }); 
+                        }
                     };
+                    
+                    stockWidget.addEventListener('click', (e) => {
+                        if (e.target.hasMoved) return;
+                        clearTimeout(stockWidgetClickTimer);
+                        stockWidgetClickTimer = setTimeout(() => {
+                            if (!getStockFlashState()) return;
+                            const apiKey = getFinnhubApiKey();
+                            if (!apiKey) return; // Skip if no API key
+                            const symbols = getStockSymbols();
+                            if (symbols.length === 0) return;
+                            const symbol = symbols[stockFlashIndex];
+                            stockFlashIndex = (stockFlashIndex + 1) % symbols.length;
+                            fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
+                                .then(r => r.json()).then(data => handleStockData(data, symbol))
+                                .catch(err => console.error(`Stock Flash click trigger error for ${symbol}:`, err));
+                        }, 200);
+                    });
+                    stockWidget.addEventListener('dblclick', (e) => {
+                        clearTimeout(stockWidgetClickTimer);
+                        stockSymbolsInput.value = getStockSymbols().join(', ');
+                        stockFlashCheckbox.checked = getStockFlashState();
+                        stockEditorMenu.classList.add('visible');
+                        
+                        // Show API key prompt if no key is set
+                        if (requiresFinnhubApiKey()) {
+                            showStockApiKeyPrompt();
+                        } else {
+                            hideStockApiKeyPrompt();
+                        }
+                    });
+                    closeStockEditorBtn.addEventListener('click', () => stockEditorMenu.classList.remove('visible'));
+                    stockEditorMenu.addEventListener('click', (e) => { if (e.target === stockEditorMenu) stockEditorMenu.classList.remove('visible'); });
+                    saveStocksBtn.addEventListener('click', () => { 
+                        // Check for API key first
+                        if (requiresFinnhubApiKey()) {
+                            showStockApiKeyPrompt();
+                            return;
+                        }
+                        
+                        const newSymbols = stockSymbolsInput.value.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0).slice(0, 7); 
+                        saveStockSymbols(newSymbols); 
+                        saveStockFlashState(stockFlashCheckbox.checked); 
+                        stockFlashIndex = 0;
+                        updateStockWidget(); 
+                        stockEditorMenu.classList.remove('visible');
+                    });
 
                     setInterval(updateTime, 1000); updateTime();
                     DRAGGABLE_ELEMENT_IDS.forEach(id => { const el = document.getElementById(id); if (el) makeDraggable(el); });
                     
                     loadPos();
                     fetchWeather(); setInterval(fetchWeather, 30 * 60 * 1000);
+                    updateStockWidget(); setInterval(updateStockWidget, 60000);
+                    checkStockFlashTrigger(); setInterval(checkStockFlashTrigger, 60 * 1000);
                 })();
                 
+                function generateSquareArt(image, callback) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const size = 512;
+                    canvas.width = canvas.height = size;
+                    const srcWidth = image.naturalWidth;
+                    const srcHeight = image.naturalHeight;
+                    const srcRatio = srcWidth / srcHeight;
+                    let sx = 0, sy = 0, sWidth = srcWidth, sHeight = srcHeight;
+                    if (srcRatio > 1) {
+                        sWidth = srcHeight;
+                        sx = (srcWidth - srcHeight) / 2;
+                    } else {
+                        sHeight = srcWidth;
+                        sy = (srcHeight - srcWidth) / 2;
+                    }
+                    ctx.drawImage(image, sx, sy, sWidth, sHeight, 0, 0, size, size);
+                    callback(canvas.toDataURL('image/jpeg'));
+                }
+
                 const getWps = () => JSON.parse(localStorage.getItem('lockscreenWallpapers_v2')) || [initialWallpaper];
                 const saveWps = (wps) => localStorage.setItem('lockscreenWallpapers_v2', JSON.stringify(wps));
-                
-                const setWp = (wpObj) => { 
-                    exitPanningMode(); 
-                    lockScreen.style.backgroundImage = `url('${wpObj.url}')`; 
-                    lockScreen.style.backgroundPosition = wpObj.position || 'center center'; 
-                    
-                    currentWallpaperImg.onload = updateMediaSessionArt;
-                    currentWallpaperImg.onerror = () => console.error("Failed to load wallpaper for media session art.");
-
-                    currentWallpaperImg.src = wpObj.url; 
-                    currentWallpaperUrl = wpObj.url; 
+                const setWp = (wpObj) => {
+                    exitPanningMode();
+                    lockScreen.style.backgroundImage = `url('${wpObj.url}')`;
+                    lockScreen.style.backgroundPosition = wpObj.position || 'center center';
+                    wallpaperReady = false;
+                    currentWallpaperImg.src = wpObj.url;
+                    currentWallpaperImg.onload = () => {
+                        wallpaperReady = true;
+                        generateSquareArt(currentWallpaperImg, (artUrl) => {
+                            window.radioPlayer.updateAlbumArt(artUrl);
+                        });
+                    };
+                    currentWallpaperImg.onerror = () => {
+                        wallpaperReady = false;
+                        console.error("Failed to load wallpaper image for media art.");
+                    };
                 };
 
-                const renderWpChoices = () => { const cont = document.getElementById('wallpaper-choices'); cont.innerHTML = ''; getWps().forEach(wp => { const thumb = document.createElement('div'); thumb.className = 'wallpaper-thumbnail'; thumb.style.backgroundImage = `url('${wp.url}')`; const rmvBtn = document.createElement('span'); rmvBtn.className = 'remove-thumb-btn'; rmvBtn.innerHTML = '×'; rmvBtn.title = 'Remove wallpaper'; rmvBtn.addEventListener('click', (e) => { e.stopPropagation(); const newWps = getWps().filter(w => w.url !== wp.url); saveWps(newWps); renderWpChoices(); }); thumb.appendChild(rmvBtn); thumb.addEventListener('click', () => { setWp(wp); localStorage.setItem('lockscreenLastSelectedWp', wp.url); settingsMenu.classList.remove('visible'); }); cont.appendChild(thumb); }); };
+                const renderWpChoices = () => { const cont = document.getElementById('wallpaper-choices'); cont.innerHTML = ''; getWps().forEach(wp => { const thumb = document.createElement('div'); thumb.className = 'wallpaper-thumbnail'; thumb.style.backgroundImage = `url('${wp.url}')`; const rmvBtn = document.createElement('span'); rmvBtn.className = 'remove-thumb-btn'; rmvBtn.title = 'Remove wallpaper'; rmvBtn.addEventListener('click', (e) => { e.stopPropagation(); const newWps = getWps().filter(w => w.url !== wp.url); saveWps(newWps); renderWpChoices(); }); thumb.appendChild(rmvBtn); thumb.addEventListener('click', () => { setWp(wp); localStorage.setItem('lockscreenLastSelectedWp', wp.url); settingsMenu.classList.remove('visible'); }); cont.appendChild(thumb); }); };
                 document.getElementById('wallpaper-url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const url = e.target.value.trim(); if(url.toLowerCase().endsWith('.gif')) { alert('Please use the GIF widget to add GIFs.'); e.target.value = ''; return; } if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) { const wps = getWps(); if (!wps.some(w => w.url === url)) { const newWp = { url: url, position: 'center center' }; wps.push(newWp); saveWps(wps); setWp(newWp); localStorage.setItem('lockscreenLastSelectedWp', newWp.url); renderWpChoices(); } e.target.value = ''; settingsMenu.classList.remove('visible'); } else { alert('Invalid URL.'); } } });
-                function exitPanningMode() { if (!isPanningMode) return; isPanningMode = false; lockScreen.classList.remove('panning-active'); const url = currentWallpaperImg.src; const wps = getWps(); const idx = wps.findIndex(w => w.url === url); if (idx > -1) { wps[idx].position = lockScreen.style.backgroundPosition; saveWps(wps); } }
+                function exitPanningMode() { exitPanningModeCompletely(); }
 
                 const resetInactivityPrompts = () => { clearTimeout(inactivityTimer); unlockPrompt.classList.remove('visible'); fullscreenHint.classList.remove('visible'); inactivityTimer = setTimeout(() => { if (document.fullscreenElement) { unlockPrompt.classList.add('visible'); } else { fullscreenHint.classList.add('visible'); } }, 60000); };
                 ['mousemove', 'mousedown', 'keydown'].forEach(evt => document.addEventListener(evt, resetInactivityPrompts));
                 resetInactivityPrompts();
                 unlockPrompt.addEventListener('click', () => { if (document.fullscreenElement) document.exitFullscreen(); });
                 
-                lockScreen.addEventListener('dblclick', (e) => { if (e.target.closest('.draggable-item')) return; if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
+                lockScreen.addEventListener('dblclick', (e) => { 
+                    if (e.target.closest('.draggable-item')) return; 
+                    if (isPanningMode) {
+                        exitPanningModeCompletely();
+                        return;
+                    }
+                    if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); 
+                });
                 
-                let isDraggingWp = false, sPanX, sPanY, sBgX, sBgY;
+                let isDraggingWp = false, sPanX, sPanY, sBgX, sBgY, startX, startY;
+                let panModeTimeout = null;
+                
                 const panMove = (e) => { if (!isDraggingWp) return; hasMovedWp = true; e.preventDefault(); const cX = e.touches ? e.touches[0].clientX : e.clientX; const cY = e.touches ? e.touches[0].clientY : e.clientY; const dX = cX - sPanX, dY = cY - sPanY; let nBgX = sBgX + dX, nBgY = sBgY + dY; const sW = lockScreen.clientWidth, sH = lockScreen.clientHeight; const iW = currentWallpaperImg.naturalWidth, iH = currentWallpaperImg.naturalHeight; const sR = sW / sH, iR = iW / iH; let scW, scH; if (iR > sR) { scH = sH; scW = sH * iR; } else { scW = sW; scH = sW / iR; } const minX = sW - scW, minY = sH - scH; nBgX = Math.max(minX, Math.min(0, nBgX)); nBgY = Math.max(minY, Math.min(0, nBgY)); lockScreen.style.backgroundPosition = `${nBgX}px ${nBgY}px`; };
+                
+                const exitPanningModeCompletely = () => {
+                    if (!isPanningMode) return;
+                    isPanningMode = false;
+                    isDraggingWp = false;
+                    lockScreen.classList.remove('panning-active');
+                    document.removeEventListener('mousemove', panMove); 
+                    document.removeEventListener('touchmove', panMove);
+                    clearTimeout(panModeTimeout);
+                    const url = currentWallpaperImg.src;
+                    const wps = getWps();
+                    const idx = wps.findIndex(w => w.url === url);
+                    if (idx > -1) {
+                        wps[idx].position = lockScreen.style.backgroundPosition;
+                        saveWps(wps);
+                    }
+                };
+                
                 const interactionEnd = () => { 
                     clearTimeout(pressHoldTimer); 
-                    if (isPanningMode) { 
+                    if (isPanningMode && isDraggingWp) { 
+                        // Only stop dragging, but keep pan mode active for 3 seconds
                         isDraggingWp = false; 
-                        lockScreen.classList.remove('panning-active');
                         document.removeEventListener('mousemove', panMove); 
-                        document.removeEventListener('touchmove', panMove); 
+                        document.removeEventListener('touchmove', panMove);
+                        
+                        // Save position after dragging ends
                         const url = currentWallpaperImg.src;
                         const wps = getWps();
                         const idx = wps.findIndex(w => w.url === url);
@@ -1178,15 +1924,108 @@
                             wps[idx].position = lockScreen.style.backgroundPosition;
                             saveWps(wps);
                         }
+                        
+                        // Keep pan mode active for 3 more seconds
+                        clearTimeout(panModeTimeout);
+                        panModeTimeout = setTimeout(exitPanningModeCompletely, 3000);
                     } 
                     document.removeEventListener('mouseup', interactionEnd); 
                     document.removeEventListener('touchend', interactionEnd); 
                     document.removeEventListener('mousemove', clearHoldTimer); 
                 };
                 const clearHoldTimer = () => { clearTimeout(pressHoldTimer); };
-                const interactionStart = (e) => { if (e.target.closest('.draggable-item')) return; const sW = lockScreen.clientWidth, sH = lockScreen.clientHeight, iW = currentWallpaperImg.naturalWidth, iH = currentWallpaperImg.naturalHeight; if (iW <= sW && iH <= sH && !isPanningMode) return; hasMovedWp = false; document.addEventListener('mouseup', interactionEnd); document.addEventListener('touchend', interactionEnd); clearTimeout(pressHoldTimer); pressHoldTimer = setTimeout(() => { isPanningMode = true; isDraggingWp = true; lockScreen.classList.add('panning-active'); const bgPos = window.getComputedStyle(lockScreen).backgroundPosition.split(' '); sBgX = parseFloat(bgPos[0]); sBgY = parseFloat(bgPos[1]); sPanX = e.touches ? e.touches[0].clientX : e.clientX; sPanY = e.touches ? e.touches[0].clientY : e.clientY; document.addEventListener('mousemove', panMove); document.addEventListener('touchmove', panMove); }, 500); document.addEventListener('mousemove', clearHoldTimer, { once: true }); };
+                const interactionStart = (e) => {
+                    if (e.target.closest('.draggable-item')) return;
+                    if (!wallpaperReady) return;
+                    const sW = lockScreen.clientWidth, sH = lockScreen.clientHeight, iW = currentWallpaperImg.naturalWidth, iH = currentWallpaperImg.naturalHeight;
+                    if (iW <= sW && iH <= sH && !isPanningMode) return;
+                    hasMovedWp = false;
+                    startX = e.touches ? e.touches[0].clientX : e.clientX;
+                    startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    document.addEventListener('mouseup', interactionEnd);
+                    document.addEventListener('touchend', interactionEnd);
+                    clearTimeout(pressHoldTimer);
+                    
+                    // If already in pan mode, start dragging immediately
+                    if (isPanningMode && !isDraggingWp) {
+                        isDraggingWp = true;
+                        const bgPos = window.getComputedStyle(lockScreen).backgroundPosition.split(' ');
+                        sBgX = parseFloat(bgPos[0]);
+                        sBgY = parseFloat(bgPos[1]);
+                        sPanX = startX;
+                        sPanY = startY;
+                        document.addEventListener('mousemove', panMove);
+                        document.addEventListener('touchmove', panMove);
+                        clearTimeout(panModeTimeout); // Cancel auto-exit since user is actively panning
+                        return;
+                    }
+                    
+                    // Improved press and hold logic for better touchscreen experience
+                    const isTouch = !!e.touches;
+                    const holdDelay = isTouch ? 400 : 300; // Longer delay for touch devices
+                    const moveThreshold = isTouch ? 25 : 15; // More forgiving movement threshold for touch
+                    
+                    pressHoldTimer = setTimeout(() => {
+                        isPanningMode = true;
+                        isDraggingWp = true;
+                        lockScreen.classList.add('panning-active');
+                        const bgPos = window.getComputedStyle(lockScreen).backgroundPosition.split(' ');
+                        sBgX = parseFloat(bgPos[0]);
+                        sBgY = parseFloat(bgPos[1]);
+                        sPanX = startX;
+                        sPanY = startY;
+                        document.addEventListener('mousemove', panMove);
+                        document.addEventListener('touchmove', panMove);
+                        
+                        // Visual feedback for successful pan mode activation
+                        lockScreen.style.filter = 'brightness(1.1)';
+                        setTimeout(() => lockScreen.style.filter = '', 150);
+                        
+                        // Set auto-exit timer for pan mode
+                        clearTimeout(panModeTimeout);
+                        panModeTimeout = setTimeout(exitPanningModeCompletely, 10000); // 10 seconds if no activity
+                    }, holdDelay);
+                    
+                    const moveCheck = (ev) => {
+                        const mX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+                        const mY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+                        if (Math.abs(mX - startX) > moveThreshold || Math.abs(mY - startY) > moveThreshold) {
+                            clearTimeout(pressHoldTimer);
+                            document.removeEventListener('mousemove', moveCheck);
+                            document.removeEventListener('touchmove', moveCheck);
+                        }
+                    };
+                    document.addEventListener('mousemove', moveCheck);
+                    document.addEventListener('touchmove', moveCheck);
+                };
+                // Add touch double-tap to exit pan mode
+                let wallpaperTapCount = 0;
+                let wallpaperTapTimer = null;
+                
+                lockScreen.addEventListener('touchstart', (e) => {
+                    if (e.target.closest('.draggable-item')) return;
+                    if (isPanningMode && e.touches.length === 1) {
+                        wallpaperTapCount++;
+                        
+                        if (wallpaperTapCount === 1) {
+                            wallpaperTapTimer = setTimeout(() => {
+                                wallpaperTapCount = 0;
+                            }, 400);
+                        } else if (wallpaperTapCount === 2) {
+                            clearTimeout(wallpaperTapTimer);
+                            wallpaperTapCount = 0;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            exitPanningModeCompletely();
+                            return;
+                        }
+                    }
+                    
+                    // Call the normal interaction start
+                    interactionStart(e);
+                }, { passive: false });
+
                 lockScreen.addEventListener('mousedown', interactionStart);
-                lockScreen.addEventListener('touchstart', interactionStart, { passive: false });
                 
                 const themeToggle = document.getElementById('theme-toggle');
                 const clockColorInput = document.getElementById('clock-color-input');
@@ -1221,8 +2060,9 @@
                     localStorage.removeItem('lockscreenGifUrls_v2');
                     localStorage.removeItem('lockscreenLastGif');
                     window.radioPlayer.reset();
+                    window.webcamPlayer.stop();
                     document.getElementById('gif-display').src = '';
-                    ['clock', 'youtube-music-btn', 'youtube-btn', 'settings-btn', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
+                    ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.cssText = '';
                     });
@@ -1237,6 +2077,22 @@
                     const qrCodeContainer = document.getElementById('qr-code');
                     qrCodeContainer.innerHTML = '';
                     qrModal.style.display = 'flex';
+                    
+                    // Update QR modal text based on type
+                    const qrTitle = document.querySelector('#qr-modal-content h2');
+                    const qrDescription = document.querySelector('#qr-modal-content p');
+                    
+                    if (type === 'imgbb-api-key') {
+                        qrTitle.textContent = 'Enter ImageBB API Key';
+                        qrDescription.textContent = 'Scan to enter your ImageBB API key from your phone.';
+                    } else if (type === 'finnhub-api-key') {
+                        qrTitle.textContent = 'Enter Finnhub API Key';
+                        qrDescription.textContent = 'Scan to enter your Finnhub API key from your phone.';
+                    } else {
+                        qrTitle.textContent = 'Scan with your phone';
+                        qrDescription.textContent = 'Scan to send an image URL from your phone.';
+                    }
+                    
                     new QRCode(qrCodeContainer, { text: uploadUrl, width: 200, height: 200 });
 
                     pollingInterval = setInterval(() => {
@@ -1247,12 +2103,39 @@
                                     clearInterval(pollingInterval);
                                     pollingInterval = null;
                                     qrModal.style.display = 'none';
-                                    const newUrl = data[session];
+                                    const receivedData = data[session];
 
-                                    if (type === 'gif') {
-                                        window.addGif(newUrl);
+                                    if (type === 'imgbb-api-key') {
+                                        localStorage.setItem('imgbbApiKey', receivedData);
+                                        // Hide ImageBB API key prompt and show success
+                                        const apiKeyPrompt = document.getElementById('imgbb-api-key-prompt');
+                                        const regularUploadUI = document.getElementById('regular-upload-ui');
+                                        if (apiKeyPrompt && regularUploadUI) {
+                                            apiKeyPrompt.style.display = 'none';
+                                            regularUploadUI.style.display = 'flex';
+                                        }
+                                        const statusElem = document.getElementById('upload-status');
+                                        if (statusElem) {
+                                            statusElem.textContent = "ImageBB API Key saved!";
+                                            setTimeout(() => statusElem.textContent = '', 3000);
+                                        }
+                                    } else if (type === 'finnhub-api-key') {
+                                        localStorage.setItem('finnhubApiKey', receivedData);
+                                        // Hide Finnhub API key prompt and update stock widget
+                                        const finnhubPrompt = document.getElementById('finnhub-api-key-prompt');
+                                        const stockRegularUI = document.getElementById('stock-regular-ui');
+                                        if (finnhubPrompt && stockRegularUI) {
+                                            finnhubPrompt.style.display = 'none';
+                                            stockRegularUI.style.display = 'flex';
+                                        }
+                                        // Update stock widget if the function exists
+                                        if (typeof updateStockWidget === 'function') {
+                                            updateStockWidget();
+                                        }
+                                    } else if (type === 'gif') {
+                                        window.addGif(receivedData);
                                     } else {
-                                        const newWp = { url: newUrl, position: 'center center' };
+                                        const newWp = { url: receivedData, position: 'center center' };
                                         const wps = getWps();
                                         if (!wps.some(w => w.url === newWp.url)) { wps.push(newWp); saveWps(wps); }
                                         setWp(newWp); localStorage.setItem('lockscreenLastSelectedWp', newWp.url); renderWpChoices();
@@ -1280,6 +2163,22 @@
                             document.getElementById('note-widget').querySelector('#note-textarea').blur();
                             exitNoteEditMode();
                         }
+                        return;
+                    }
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+                    if (!getStockFlashState()) return;
+                    
+                    let isUp = null;
+                    if (e.key === 'ArrowUp') isUp = true;
+                    if (e.key === 'ArrowDown') isUp = false;
+                    
+                    if (isUp !== null) {
+                        e.preventDefault();
+                        const symbols = getStockSymbols();
+                        if (symbols.length === 0) return;
+                        const symbol = symbols[stockFlashIndex];
+                        const isSuper = e.shiftKey;
+                        triggerStockFlashEffect(isUp, isSuper, symbol);
                     }
                 });
             }
