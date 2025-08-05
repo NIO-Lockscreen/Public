@@ -281,7 +281,7 @@
             </div>
             <div id="advanced-settings-footer" class="hidden">
                 <div class="settings-section">
-                    <button id="reset-positions-btn">Reset All Positions</button>
+                    <button id="reset-positions-btn">Reset All Data & API Keys</button>
                 </div>
             </div>
             <div class="settings-section settings-footer" id="settings-footer">
@@ -295,7 +295,7 @@
     <div id="radio-menu"><div class="menu-content"><button id="close-radio-btn">×</button><h2>Select a Radio Station</h2><div id="radio-channel-list"></div></div></div>
     <div id="gif-chooser-menu"><div class="menu-content"><button id="close-gif-chooser-btn">×</button><h2>Choose a GIF</h2><div id="gif-choices"></div><button id="add-new-gif-btn"><i class="fa-solid fa-plus"></i> Add New GIF</button></div></div>
     <div id="qr-modal"><div id="qr-modal-content"><h2>Scan with your phone</h2><div id="qr-code"></div><p>Scan to send an image URL from your phone.</p></div></div>
-    <div id="upload-view"><div id="phone-upload-container"><h2>Add Wallpaper from Phone</h2><div id="regular-upload-ui"><label for="file-input" id="upload-label">Tap to Upload Image</label><input type="file" id="file-input" accept="image/*" style="display: none;"><p class="separator-text">... or ...</p><p>Paste an image URL below</p><input type="url" id="phone-url-input" placeholder="https://example.com/image.jpg"><button id="phone-url-submit">Use this URL</button></div><div id="imgbb-api-key-prompt" style="display: none; flex-direction: column; gap: 10px;"><p>For image uploads to work, you need a free ImageBB account and API key.</p><p><a href="https://api.imgbb.com/" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p><input type="text" id="imgbb-api-key-input" placeholder="Your ImageBB API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;"><button id="save-imgbb-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button><button id="qr-imgbb-api-key-btn" style="background-color: #34c759; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; margin-top: 10px;">Enter from Phone</button></div><h2 id="upload-status"></h2></div></div>
+    <div id="upload-view"><div id="phone-upload-container"><h2>Add Wallpaper from Phone</h2><div id="regular-upload-ui"><label for="file-input" id="upload-label">Tap to Upload Image</label><input type="file" id="file-input" accept="image/*" style="display: none;"><p style="font-size: 0.9rem; color: #888; margin: 5px 0;">File upload requires ImageBB API key</p><p class="separator-text">... or ...</p><p>Paste an image URL below</p><input type="url" id="phone-url-input" placeholder="https://example.com/image.jpg"><button id="phone-url-submit">Use this URL</button><p style="font-size: 0.9rem; color: #888; margin: 5px 0;">Direct URLs work without API key</p></div><div id="imgbb-api-key-prompt" style="display: none; flex-direction: column; gap: 10px;"><p>For image uploads to work, you need a free ImageBB account and API key.</p><p><a href="https://api.imgbb.com/" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p><input type="text" id="imgbb-api-key-input" placeholder="Your ImageBB API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;"><button id="save-imgbb-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button><button id="qr-imgbb-api-key-btn" style="background-color: #34c759; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; margin-top: 10px;">Enter from Phone</button></div><h2 id="upload-status"></h2></div></div>
     <div id="flash-top" class="flash-overlay"></div>
     <div id="flash-bottom" class="flash-overlay"></div>
     
@@ -1208,12 +1208,43 @@
                     // --- IMPROVED DOUBLE-CLICK/TAP TO ENTER/EXIT MODE ---
                     let webcamTapCount = 0;
                     let webcamTapTimer = null;
+                    let webcamClickCount = 0;
+                    
+                    // Single click to start/stop camera
+                    webcamWidget.addEventListener('click', (e) => {
+                        if (e.target.closest('#webcam-controls, #webcam-portrait-btn')) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        webcamClickCount++;
+                        
+                        if (webcamClickCount === 1) {
+                            webcamClickTimer = setTimeout(() => {
+                                webcamClickCount = 0;
+                                
+                                // Single click - toggle camera
+                                if (window.webcamPlayer.stream) {
+                                    window.webcamPlayer.stop();
+                                } else {
+                                    window.webcamPlayer.start();
+                                }
+                            }, 400); // Wait to see if double click comes
+                        }
+                    });
                     
                     // Mouse double-click
                     webcamWidget.addEventListener('dblclick', (e) => {
                         if (e.target.closest('#webcam-controls, #webcam-portrait-btn')) return;
                         e.preventDefault();
                         e.stopPropagation();
+                        
+                        // Cancel single click timer
+                        if (webcamClickTimer) {
+                            clearTimeout(webcamClickTimer);
+                            webcamClickTimer = null;
+                        }
+                        webcamClickCount = 0;
+                        
                         toggleWebcamPanZoomMode();
                     });
 
@@ -1227,6 +1258,13 @@
                         if (webcamTapCount === 1) {
                             webcamTapTimer = setTimeout(() => {
                                 webcamTapCount = 0; // Reset if second tap doesn't come
+                                
+                                // Single tap - toggle camera
+                                if (window.webcamPlayer.stream) {
+                                    window.webcamPlayer.stop();
+                                } else {
+                                    window.webcamPlayer.start();
+                                }
                             }, 400); // 400ms window for double tap
                         } else if (webcamTapCount === 2) {
                             clearTimeout(webcamTapTimer);
@@ -1338,10 +1376,10 @@
                         
                         webcamMirrorTimer = setTimeout(() => {
                             // Check if we haven't moved too much
-                            videoWrapper.classList.toggle('normal-view');
+                                videoWrapper.classList.toggle('normal-view');
                             // Visual feedback
-                            videoWrapper.style.filter = 'brightness(1.3)';
-                            setTimeout(() => videoWrapper.style.filter = '', 150);
+                                videoWrapper.style.filter = 'brightness(1.3)';
+                                setTimeout(() => videoWrapper.style.filter = '', 150);
                             
                             // Haptic feedback if available
                             if (navigator.vibrate) {
@@ -1576,7 +1614,7 @@
                         note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: false },
                         music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: false },
                         gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: false },
-                        webcam: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-webcam-widget'), default: false },
+                        webcam: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-webcam-widget'), default: true },
                     };
                     
                     function initializeWidgetToggles() {
@@ -1914,7 +1952,7 @@
                         // Only stop dragging, but keep pan mode active for 3 seconds
                         isDraggingWp = false; 
                         document.removeEventListener('mousemove', panMove); 
-                        document.removeEventListener('touchmove', panMove);
+                        document.removeEventListener('touchmove', panMove); 
                         
                         // Save position after dragging ends
                         const url = currentWallpaperImg.src;
@@ -2053,21 +2091,74 @@
                 fontSelect.addEventListener('change', () => { const newFont = fontSelect.value; localStorage.setItem('lockscreenClockFont', newFont); applyFont(newFont); });
 
                 resetPositionsBtn.addEventListener('click', () => {
+                    // Clear widget positions and content
                     localStorage.removeItem('lockscreenItemPositions_v5');
                     localStorage.removeItem('lockscreenNoteContent');
                     localStorage.removeItem('lockscreenNoteFontFamily');
                     localStorage.removeItem('lockscreenNoteFontSize');
                     localStorage.removeItem('lockscreenGifUrls_v2');
                     localStorage.removeItem('lockscreenLastGif');
+                    
+                    // Clear API keys
+                    localStorage.removeItem('imgbbApiKey');
+                    localStorage.removeItem('finnhubApiKey');
+                    
+                    // Clear other stored data
+                    localStorage.removeItem('lockscreenStockSymbols');
+                    localStorage.removeItem('lockscreenStockFlashEnabled');
+                    localStorage.removeItem('webcamFullState');
+                    localStorage.removeItem('webcamPanZoomState');
+                    localStorage.removeItem('lockscreenWallpapers_v2');
+                    localStorage.removeItem('lockscreenLastSelectedWp');
+                    
+                    // Clear widget visibility states
+                    localStorage.removeItem('widget_stock_visible');
+                    localStorage.removeItem('widget_note_visible');
+                    localStorage.removeItem('widget_music_visible');
+                    localStorage.removeItem('widget_gif_visible');
+                    localStorage.removeItem('widget_webcam_visible');
+                    
+                    // Reset components
                     window.radioPlayer.reset();
                     window.webcamPlayer.stop();
                     document.getElementById('gif-display').src = '';
+                    
+                    // Reset widget positions
                     ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.cssText = '';
                     });
+                    
+                    // Reset clock scale
                     const applyClockScale = (scale) => { clockScale = scale; const baseSizeVW = 15; const newSize = baseSizeVW * scale; document.getElementById('hours').style.fontSize = `clamp(${newSize * 0.4}rem, ${newSize}vw, ${newSize * 0.8}rem)`; document.getElementById('minutes').style.fontSize = `clamp(${newSize * 0.4}rem, ${newSize}vw, ${newSize * 0.8}rem)`; };
                     applyClockScale(1);
+                    
+                    // Reset widget toggles to default states
+                    const WIDGETS = {
+                        stock: { el: document.getElementById('stock-widget'), toggle: document.getElementById('toggle-stock-widget'), default: true },
+                        note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: false },
+                        music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: false },
+                        gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: false },
+                        webcam: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-webcam-widget'), default: true },
+                    };
+                    
+                    const webcamToggleBtn = document.getElementById('webcam-toggle-btn');
+                    for(const key in WIDGETS) {
+                        const widget = WIDGETS[key];
+                        const isVisible = widget.default;
+                        
+                        widget.el.classList.toggle('hidden', !isVisible);
+                        widget.toggle.checked = isVisible;
+                        
+                        if (key === 'webcam') {
+                            webcamToggleBtn.classList.toggle('hidden', !isVisible);
+                        }
+                    }
+                    
+                    // Reset stock widget to show API key prompt
+                    updateStockWidget();
+                    
+                    // Close settings
                     settingsMenu.classList.remove('visible');
                 });
 
