@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Lockscreen</title>
     <!-- MODIFIED: Favicons for Car Dash / Browser Tabs -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c2c2e'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='white' stroke-width='8'/%3E%3C/svg%3E">
@@ -182,8 +181,8 @@
         <div id="status-bar"><div id="weather-info"><span id="date"></span> <i id="weather-icon" class="fa-solid fa-cloud-sun"></i> <span id="temperature">...</span></div></div>
         <div id="fullscreen-hint">Double press wallpaper for fullscreen</div>
         <div id="clock" class="draggable-item"><div id="hours">00</div><div id="minutes">00</div></div>
-        <div id="youtube-music-btn" class="draggable-item app-icon"><a href="https://music.youtube.com/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FF0000"/><circle cx="50" cy="50" r="23" fill="none" stroke="white" stroke-width="4"/><polygon points="43,38 62,50 43,62" fill="white"/></svg></a></div>
-        <div id="youtube-btn" class="draggable-item app-icon"><a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FF0000"/><path d="M 35,29 A 10,10 0 0 0 25,39 V 61 A 10,10 0 0 0 35,71 H 65 A 10,10 0 0 0 75,61 V 39 A 10,10 0 0 0 65,29 Z" fill="white"/><polygon points="45,42 62,50 45,58" fill="#FF0000"/></svg></a></div>
+        <div id="youtube-music-btn" class="draggable-item app-icon" role="button" tabindex="0" aria-label="Open YouTube Music"><a href="https://music.youtube.com/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FF0000"/><circle cx="50" cy="50" r="23" fill="none" stroke="white" stroke-width="4"/><polygon points="43,38 62,50 43,62" fill="white"/></svg></a></div>
+        <div id="youtube-btn" class="draggable-item app-icon" role="button" tabindex="0" aria-label="Open YouTube"><a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FF0000"/><path d="M 35,29 A 10,10 0 0 0 25,39 V 61 A 10,10 0 0 0 35,71 H 65 A 10,10 0 0 0 75,61 V 39 A 10,10 0 0 0 65,29 Z" fill="white"/><polygon points="45,42 62,50 45,58" fill="#FF0000"/></svg></a></div>
         
         <!-- Widgets -->
         <div id="stock-widget" class="draggable-item widget" title="Single-click to trigger effect | Double-click to edit"></div>
@@ -210,7 +209,7 @@
         </div>
         <div id="gif-widget" class="draggable-item" title="Click to add GIF | Double-click to choose">
             <i id="gif-widget-placeholder" class="fa-solid fa-image"></i>
-            <img id="gif-display">
+            <img id="gif-display" alt="Selected GIF">
             <div id="remove-gif-btn">×</div>
         </div>
 
@@ -230,11 +229,11 @@
         <button id="webcam-portrait-btn" style="position: absolute; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 20; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1em;">9:16</button>
 
         <!-- NEW: Webcam Toggle Button -->
-        <div id="webcam-toggle-btn" class="draggable-item app-icon hidden" title="Toggle Rear Seat Cam">
+        <div id="webcam-toggle-btn" class="draggable-item app-icon hidden" title="Toggle Rear Seat Cam" role="button" tabindex="0" aria-label="Toggle Rear Seat Cam">
             <i class="fa-solid fa-video-slash"></i>
         </div>
 
-        <div id="settings-btn" class="draggable-item app-icon" title="Open settings menu"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" fill="rgba(80, 80, 80, 0.6)"/><circle cx="8" cy="8" r="4" fill="none" stroke="var(--icon-stroke-color)" stroke-width="1.5"/></svg></div>
+        <div id="settings-btn" class="draggable-item app-icon" title="Open settings menu" role="button" tabindex="0" aria-label="Open settings"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" fill="rgba(80, 80, 80, 0.6)"/><circle cx="8" cy="8" r="4" fill="none" stroke="var(--icon-stroke-color)" stroke-width="1.5"/></svg></div>
         <div id="fun-stock-name-display" class="draggable-item"></div>
         <div id="unlock-prompt">Press to unlock</div>
     </div>
@@ -281,7 +280,7 @@
             </div>
             <div id="advanced-settings-footer" class="hidden">
                 <div class="settings-section">
-                    <button id="reset-positions-btn">Reset All Data & API Keys</button>
+                    <button id="reset-positions-btn">Reset All Positions</button>
                 </div>
             </div>
             <div class="settings-section settings-footer" id="settings-footer">
@@ -290,12 +289,12 @@
             </div>
         </div>
     </div>
-    <div id="stock-editor-menu"><div class="menu-content"><button id="close-stock-editor-btn">×</button><h2>Edit Stock Symbols</h2><div id="stock-regular-ui"><p>Enter up to 7 stock symbols, separated by commas.</p><input type="text" id="stock-symbols-input" placeholder="TSLA, GOOGL, AKBA..."><div class="stock-flash-toggle"><label for="stock-flash-checkbox">Stock Flash 🎉</label><input type="checkbox" id="stock-flash-checkbox"></div><button id="save-stocks-btn">Save and Update</button></div><div id="finnhub-api-key-prompt" style="display: none; flex-direction: column; gap: 10px; text-align: center;"><p>For stock data to work, you need a free Finnhub account and API key.</p><p><a href="https://finnhub.io/register" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p><input type="text" id="finnhub-api-key-input" placeholder="Your Finnhub API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;"><button id="save-finnhub-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button><button id="qr-finnhub-api-key-btn" style="background-color: #34c759; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; margin-top: 10px;">Enter from Phone</button></div></div></div>
+    <div id="stock-editor-menu"><div class="menu-content"><button id="close-stock-editor-btn">×</button><h2>Edit Stock Symbols</h2><p>Enter up to 7 stock symbols, separated by commas.</p><input type="text" id="stock-symbols-input" placeholder="TSLA, GOOGL, AKBA..."><div class="stock-flash-toggle"><label for="stock-flash-checkbox">Stock Flash 🎉</label><input type="checkbox" id="stock-flash-checkbox"></div><button id="save-stocks-btn">Save and Update</button></div></div>
     <div id="note-editor-menu"><div class="menu-content"><button id="close-note-editor-btn">×</button><h2>Edit Note Style</h2><div class="settings-section"><label for="note-font-select">Font Family</label><select id="note-font-select"><option value="'Roboto', sans-serif">Roboto (Default)</option><option value="'Lora', serif">Lora</option><option value="'Inter', sans-serif">Inter</option><option value="'Source Code Pro', monospace">Source Code Pro</option></select></div><div class="settings-section"><label for="note-font-size-input">Font Size (px)</label><input type="text" id="note-font-size-input" inputmode="numeric" pattern="[0-9]*" value="16"></div></div></div>
     <div id="radio-menu"><div class="menu-content"><button id="close-radio-btn">×</button><h2>Select a Radio Station</h2><div id="radio-channel-list"></div></div></div>
     <div id="gif-chooser-menu"><div class="menu-content"><button id="close-gif-chooser-btn">×</button><h2>Choose a GIF</h2><div id="gif-choices"></div><button id="add-new-gif-btn"><i class="fa-solid fa-plus"></i> Add New GIF</button></div></div>
     <div id="qr-modal"><div id="qr-modal-content"><h2>Scan with your phone</h2><div id="qr-code"></div><p>Scan to send an image URL from your phone.</p></div></div>
-    <div id="upload-view"><div id="phone-upload-container"><h2>Add Wallpaper from Phone</h2><div id="regular-upload-ui"><label for="file-input" id="upload-label">Tap to Upload Image</label><input type="file" id="file-input" accept="image/*" style="display: none;"><p style="font-size: 0.9rem; color: #888; margin: 5px 0;">File upload requires ImageBB API key</p><p class="separator-text">... or ...</p><p>Paste an image URL below</p><input type="url" id="phone-url-input" placeholder="https://example.com/image.jpg"><button id="phone-url-submit">Use this URL</button><p style="font-size: 0.9rem; color: #888; margin: 5px 0;">Direct URLs work without API key</p></div><div id="imgbb-api-key-prompt" style="display: none; flex-direction: column; gap: 10px;"><p>For image uploads to work, you need a free ImageBB account and API key.</p><p><a href="https://api.imgbb.com/" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p><input type="text" id="imgbb-api-key-input" placeholder="Your ImageBB API Key" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none;"><button id="save-imgbb-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500;">Save Key</button><button id="qr-imgbb-api-key-btn" style="background-color: #34c759; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; margin-top: 10px;">Enter from Phone</button></div><h2 id="upload-status"></h2></div></div>
+    <div id="upload-view"><div id="phone-upload-container"><h2>Add Wallpaper from Phone</h2><label for="file-input" id="upload-label">Tap to Upload Image</label><input type="file" id="file-input" accept="image/*" style="display: none;"><p class="separator-text">... or ...</p><p>Paste an image URL below</p><input type="url" id="phone-url-input" placeholder="https://example.com/image.jpg"><button id="phone-url-submit">Use this URL</button><h2 id="upload-status"></h2></div></div>
     <div id="flash-top" class="flash-overlay"></div>
     <div id="flash-bottom" class="flash-overlay"></div>
     
@@ -324,105 +323,13 @@
                 initializeLockscreen();
             }
 
-            function handleApiKeySetup(session) {
-                document.body.style.backgroundColor = '#1a1a1a';
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('upload-view').style.display = 'flex';
-                
-                const container = document.getElementById('phone-upload-container');
-                const statusElem = document.getElementById('upload-status');
-                
-                // Determine API key type
-                const isImgbbKey = session.includes('imgbb_api_key_');
-                const isFinnhubKey = session.includes('finnhub_api_key_');
-                
-                container.innerHTML = `
-                    <h2>Enter API Key from Phone</h2>
-                    <p>${isImgbbKey ? 'Enter your ImageBB API key' : 'Enter your Finnhub API key'}</p>
-                    <p><a href="${isImgbbKey ? 'https://api.imgbb.com/' : 'https://finnhub.io/register'}" target="_blank" style="color: #0a84ff;">Get your free API key here</a></p>
-                    <input type="text" id="api-key-phone-input" placeholder="${isImgbbKey ? 'Your ImageBB API Key' : 'Your Finnhub API Key'}" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #555; background-color: #3a3a3c; color: white; font-size: 1rem; outline: none; margin: 10px 0;">
-                    <button id="submit-api-key-btn" style="background-color: #0a84ff; color: white; border: none; padding: 15px 20px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 500; width: 100%;">Save API Key</button>
-                    <h2 id="upload-status"></h2>
-                `;
-                
-                const apiKeyInput = document.getElementById('api-key-phone-input');
-                const submitBtn = document.getElementById('submit-api-key-btn');
-                const newStatusElem = document.getElementById('upload-status');
-                
-                submitBtn.addEventListener('click', () => {
-                    const apiKey = apiKeyInput.value.trim();
-                    if (!apiKey) {
-                        newStatusElem.textContent = 'Please enter a valid API key.';
-                        return;
-                    }
-                    
-                    newStatusElem.textContent = 'Sending API key to PC...';
-                    submitBtn.disabled = true;
-                    apiKeyInput.disabled = true;
-                    
-                    fetch(`https://api.npoint.io/${NPOINT_BIN_ID}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ [session]: apiKey })
-                    })
-                    .then(r => {
-                        if (!r.ok) throw new Error('Failed to send API key.');
-                        newStatusElem.textContent = 'Success! API key sent to PC. You can close this window.';
-                    })
-                    .catch(e => {
-                        newStatusElem.textContent = `Error: ${e.message}`;
-                        submitBtn.disabled = false;
-                        apiKeyInput.disabled = false;
-                    });
-                });
-            }
-
             function handlePhoneUpload(session) {
+                const IMGBB_API_KEY = '4418969a1a33c4e2ea690d835d915e52';
                 const fileInput = document.getElementById('file-input');
                 const urlInput = document.getElementById('phone-url-input');
                 const urlSubmitBtn = document.getElementById('phone-url-submit');
                 const statusElem = document.getElementById('upload-status');
                 const uploadLabel = document.getElementById('upload-label');
-                const apiKeyPrompt = document.getElementById('imgbb-api-key-prompt');
-                const apiKeyInput = document.getElementById('imgbb-api-key-input');
-                const saveApiKeyBtn = document.getElementById('save-imgbb-api-key-btn');
-                const regularUploadUI = document.getElementById('regular-upload-ui');
-                
-                // Check if this is an API key setup session
-                if (session.includes('_api_key_')) {
-                    handleApiKeySetup(session);
-                    return;
-                }
-
-                function showApiKeyPrompt() {
-                    regularUploadUI.style.display = 'none';
-                    apiKeyPrompt.style.display = 'flex';
-                }
-
-                function hideApiKeyPrompt() {
-                    apiKeyPrompt.style.display = 'none';
-                    regularUploadUI.style.display = 'flex';
-                }
-
-                // Save API key
-                saveApiKeyBtn.addEventListener('click', () => {
-                    const key = apiKeyInput.value.trim();
-                    if (key) {
-                        localStorage.setItem('imgbbApiKey', key);
-                        hideApiKeyPrompt();
-                        statusElem.textContent = "API Key saved! You can now upload.";
-                        setTimeout(() => statusElem.textContent = '', 3000);
-                    } else {
-                        statusElem.textContent = "Please enter a valid API key.";
-                    }
-                });
-
-                // QR code for ImageBB API key entry
-                const qrImgbbApiKeyBtn = document.getElementById('qr-imgbb-api-key-btn');
-                qrImgbbApiKeyBtn.addEventListener('click', () => {
-                    window.startPolling(`imgbb_api_key_${Date.now()}`, 'imgbb-api-key');
-                });
-
                 const sendUrlToLockscreen = (imageUrl) => {
                     statusElem.textContent = 'Sending to PC...';
                     fileInput.disabled = true; urlInput.disabled = true; urlSubmitBtn.disabled = true;
@@ -431,37 +338,7 @@
                     .then(r => { if (!r.ok) throw new Error('Failed to update PC.'); statusElem.textContent = 'Success! You can close this window.'; })
                     .catch(e => { statusElem.textContent = `Error: ${e.message}`; fileInput.disabled = false; urlInput.disabled = false; urlSubmitBtn.disabled = false; uploadLabel.style.backgroundColor = '#34c759'; });
                 };
-
-                fileInput.addEventListener('change', (e) => { 
-                    const file = e.target.files[0]; 
-                    if (!file) return; 
-
-                    // Check for API key
-                    const IMGBB_API_KEY = localStorage.getItem('imgbbApiKey');
-                    if (!IMGBB_API_KEY) {
-                        showApiKeyPrompt();
-                        statusElem.textContent = "API Key required for upload.";
-                        fileInput.value = '';
-                        return;
-                    }
-
-                    statusElem.textContent = 'Uploading to ImgBB...'; 
-                    const formData = new FormData(); 
-                    formData.append('key', IMGBB_API_KEY); 
-                    formData.append('image', file); 
-                    fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
-                    .then(response => response.json())
-                    .then(data => { 
-                        if (data.success) { 
-                            sendUrlToLockscreen(data.data.url); 
-                        } else { 
-                            throw new Error(data.error.message || 'ImgBB upload failed.'); 
-                        } 
-                    })
-                    .catch(error => { 
-                        statusElem.textContent = `Error: ${error.message}`; 
-                    }); 
-                });
+                fileInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; statusElem.textContent = 'Uploading to ImgBB...'; const formData = new FormData(); formData.append('key', IMGBB_API_KEY); formData.append('image', file); fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData }).then(response => response.json()).then(data => { if (data.success) { sendUrlToLockscreen(data.data.url); } else { throw new Error(data.error.message || 'ImgBB upload failed.'); } }).catch(error => { statusElem.textContent = `Error: ${error.message}`; }); });
                 urlSubmitBtn.addEventListener('click', () => { const imageUrl = urlInput.value.trim(); if (!imageUrl || !imageUrl.startsWith('http')) { statusElem.textContent = 'Please enter a valid image URL.'; return; } sendUrlToLockscreen(imageUrl); });
             }
 
@@ -470,6 +347,7 @@
                 const closeSettingsBtn = document.getElementById('close-settings-btn');
                 const fullscreenHint = document.getElementById('fullscreen-hint');
                 const unlockPrompt = document.getElementById('unlock-prompt');
+                let wallpaperReady = false;
                 
                 const advancedSettingsView = document.getElementById('advanced-settings-view');
                 const advancedSettingsFooter = document.getElementById('advanced-settings-footer');
@@ -501,9 +379,7 @@
                 closeSettingsBtn.addEventListener('click', () => settingsMenu.classList.remove('visible'));
                 settingsMenu.addEventListener('click', (e) => { if (e.target === settingsMenu) settingsMenu.classList.remove('visible'); });
 
-                // API Key helper functions
-                const getFinnhubApiKey = () => localStorage.getItem('finnhubApiKey');
-                const requiresFinnhubApiKey = () => !getFinnhubApiKey();
+                // No API key required; using Yahoo Finance via allorigins proxy
                 
                 const stockWidget = document.getElementById('stock-widget');
                 const stockEditorMenu = document.getElementById('stock-editor-menu');
@@ -511,38 +387,6 @@
                 const saveStocksBtn = document.getElementById('save-stocks-btn');
                 const stockSymbolsInput = document.getElementById('stock-symbols-input');
                 const stockFlashCheckbox = document.getElementById('stock-flash-checkbox');
-                const stockRegularUI = document.getElementById('stock-regular-ui');
-                const finnhubApiKeyPrompt = document.getElementById('finnhub-api-key-prompt');
-                const finnhubApiKeyInput = document.getElementById('finnhub-api-key-input');
-                const saveFinnhubApiKeyBtn = document.getElementById('save-finnhub-api-key-btn');
-
-                function showStockApiKeyPrompt() {
-                    stockRegularUI.style.display = 'none';
-                    finnhubApiKeyPrompt.style.display = 'flex';
-                }
-
-                function hideStockApiKeyPrompt() {
-                    finnhubApiKeyPrompt.style.display = 'none';
-                    stockRegularUI.style.display = 'flex';
-                }
-
-                // Save Finnhub API key
-                saveFinnhubApiKeyBtn.addEventListener('click', () => {
-                    const key = finnhubApiKeyInput.value.trim();
-                    if (key) {
-                        localStorage.setItem('finnhubApiKey', key);
-                        hideStockApiKeyPrompt();
-                        updateStockWidget(); // Refresh stock data with new key
-                    } else {
-                        alert("Please enter a valid API key.");
-                    }
-                });
-
-                // QR code for Finnhub API key entry
-                const qrFinnhubApiKeyBtn = document.getElementById('qr-finnhub-api-key-btn');
-                qrFinnhubApiKeyBtn.addEventListener('click', () => {
-                    window.startPolling(`finnhub_api_key_${Date.now()}`, 'finnhub-api-key');
-                });
 
                 const getStockSymbols = () => JSON.parse(localStorage.getItem('lockscreenStockSymbols')) || ['NIO'];
                 const saveStockSymbols = (symbols) => localStorage.setItem('lockscreenStockSymbols', JSON.stringify(symbols));
@@ -611,52 +455,108 @@
                     triggerStockFlashEffect(isUp, isSuper, symbol);
                 }
                 
+                // Fetch stock quote without API key using Yahoo Finance (with proxies) and cache
+                function fetchQuoteNoKey(symbol) {
+                    const proxies = [
+                        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                        (url) => `https://cors.isomorphic-git.org/${url}`,
+                        (url) => `https://thingproxy.freeboard.io/fetch/${url}`
+                    ];
+                    const yUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
+
+                    const parseYahoo = (j) => {
+                        const q = j && j.quoteResponse && j.quoteResponse.result && j.quoteResponse.result[0];
+                        if (!q) return null;
+                        const current = firstNumber(q.regularMarketPrice, q.postMarketPrice, q.preMarketPrice, q.previousClose);
+                        const open = firstNumber(q.regularMarketOpen, q.previousClose);
+                        const prevClose = typeof q.previousClose === 'number' ? q.previousClose : undefined;
+                        if (typeof current !== 'number') return null;
+                        return { c: current, o: (typeof open === 'number' ? open : current), p: prevClose };
+                    };
+
+                    const firstNumber = (...vals) => {
+                        for (const v of vals) { if (typeof v === 'number' && !Number.isNaN(v)) return v; }
+                        return undefined;
+                    };
+
+                    const tryProxies = async () => {
+                        for (const wrap of proxies) {
+                            try {
+                                const res = await fetch(wrap(yUrl));
+                                const text = await res.text();
+                                // Yahoo returns JSON; ensure we parse text safely
+                                const json = JSON.parse(text);
+                                const parsed = parseYahoo(json);
+                                if (parsed) return parsed;
+                            } catch (_) { /* try next proxy */ }
+                        }
+                        // Fallback: Stooq daily close (last available)
+                        try {
+                            const stooqSym = (symbol.includes('.') ? symbol : `${symbol}.us`).toLowerCase();
+                            const stooqUrl = `https://stooq.com/q/l/?s=${encodeURIComponent(stooqSym)}&i=d`;
+                            const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(stooqUrl)}`);
+                            const csv = await res.text();
+                            // CSV format: Symbol,Date,Time,Open,High,Low,Close,Volume
+                            const line = csv.trim().split(/\r?\n/)[1] || '';
+                            const parts = line.split(',');
+                            const close = parseFloat(parts[6]);
+                            if (!Number.isNaN(close)) {
+                                return { c: close, o: close, p: close };
+                            }
+                        } catch (_) {}
+                        return null;
+                    };
+
+                    return tryProxies().then(data => {
+                        if (data) saveCachedQuote(symbol, data);
+                        return data || getCachedQuote(symbol);
+                    });
+                }
+
+                function saveCachedQuote(symbol, data) {
+                    try { localStorage.setItem(`lockscreenStockCache_v1_${symbol}`, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
+                }
+                function getCachedQuote(symbol) {
+                    try {
+                        const raw = localStorage.getItem(`lockscreenStockCache_v1_${symbol}`);
+                        if (!raw) return null;
+                        const obj = JSON.parse(raw);
+                        return obj && typeof obj.c === 'number' ? { c: obj.c, o: obj.o, p: obj.p } : null;
+                    } catch { return null; }
+                }
+
                 function checkStockFlashTrigger() {
                     if (!getStockFlashState() || !isMarketOpen()) return;
-                    const apiKey = getFinnhubApiKey();
-                    if (!apiKey) return; // Skip if no API key
-                    
                     const symbols = getStockSymbols();
                     if (symbols.length === 0) return;
                     const symbol = symbols[stockFlashIndex];
                     stockFlashIndex = (stockFlashIndex + 1) % symbols.length;
 
-                    fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
-                        .then(r => r.json()).then(data => handleStockData(data, symbol))
+                    fetchQuoteNoKey(symbol)
+                        .then(data => handleStockData(data || getCachedQuote(symbol), symbol))
                         .catch(err => console.error(`Stock Flash fetch error for ${symbol}:`, err));
                 }
 
                 function updateStockWidget() {
                     const symbols = getStockSymbols();
-                    const apiKey = getFinnhubApiKey();
                     stockWidget.innerHTML = '';
-                    
-                    if (!apiKey) { 
-                        stockWidget.innerHTML = '<div class="stock-row"><span style="color: #0a84ff; cursor: pointer;" onclick="document.getElementById(\'stock-editor-menu\').classList.add(\'visible\');">Add API Key for Stocks</span></div>'; 
-                        return; 
-                    }
-                    
+                    if (symbols.length === 0) return;
                     symbols.forEach(symbol => {
                         const row = document.createElement('div'); row.className = 'stock-row';
                         row.innerHTML = `<div class="stock-info"><i class="fa-solid"></i> ${symbol}</div><span class="stock-price">...</span>`;
                         stockWidget.appendChild(row);
-                        fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
-                            .then(r => r.json()).then(data => {
-                                if (!data || typeof data.c === 'undefined' || data.o === 0) { row.querySelector('.stock-price').textContent = 'N/A'; return; }
-                                const priceEl = row.querySelector('.stock-price');
-                                const iconEl = row.querySelector('i');
-                                priceEl.textContent = (data.c < 10) ? data.c.toFixed(3) : data.c.toFixed(2);
-                                iconEl.className = 'fa-solid';
-                                if (data.c > data.o) {
-                                    iconEl.classList.add('fa-caret-up');
-                                } else if (data.c < data.o) {
-                                    iconEl.classList.add('fa-caret-down');
-                                }
-                            })
-                            .catch(err => {
-                                row.querySelector('.stock-price').textContent = 'Error';
-                                console.error(`Stock fetch error for ${symbol}:`, err);
-                            });
+                        fetchQuoteNoKey(symbol).then(data => {
+                            const priceEl = row.querySelector('.stock-price');
+                            const iconEl = row.querySelector('i');
+                            const showData = data || getCachedQuote(symbol);
+                            if (!showData || typeof showData.c !== 'number') { priceEl.textContent = 'N/A'; return; }
+                            priceEl.textContent = (showData.c < 10) ? showData.c.toFixed(3) : showData.c.toFixed(2);
+                            iconEl.className = 'fa-solid';
+                            if (typeof showData.o === 'number' && showData.o > 0) {
+                                if (showData.c > showData.o) iconEl.classList.add('fa-caret-up');
+                                else if (showData.c < showData.o) iconEl.classList.add('fa-caret-down');
+                            }
+                        });
                     });
                 }
                 
@@ -717,7 +617,7 @@
                     
                     noteWidget.addEventListener('dblclick', (e) => {
                         if (noteWidget.isEditing) return;
-                        if (!e.target.hasMoved) {
+                        if (noteWidget.dataset.justDragged !== 'true') {
                             enterNoteEditMode();
                         }
                     });
@@ -919,8 +819,8 @@
                         window.startPolling(`gif_session_${Date.now()}`, 'gif');
                     });
 
-                    gifWidget.addEventListener('click', (e) => { if (!e.target.hasMoved && !gifWidget.classList.contains('has-gif')) window.startPolling(`gif_session_${Date.now()}`, 'gif'); });
-                    gifWidget.addEventListener('dblclick', (e) => { if (!e.target.hasMoved) openGifChooser(); });
+                    gifWidget.addEventListener('click', (e) => { if (gifWidget.dataset.justDragged !== 'true' && !gifWidget.classList.contains('has-gif')) window.startPolling(`gif_session_${Date.now()}`, 'gif'); });
+                    gifWidget.addEventListener('dblclick', (e) => { if (gifWidget.dataset.justDragged !== 'true') openGifChooser(); });
                     closeGifChooserBtn.addEventListener('click', () => gifChooserMenu.classList.remove('visible'));
                     window.addGif = addGif;
                     renderCurrentGif();
@@ -1324,57 +1224,39 @@
                     let webcamPanMouse = { isDown: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0 };
                     let webcamWidgetDragInProgress = false;
                     
-                    // Mirror toggle only available in pan/zoom mode via long press
-                    let webcamMirrorTimer = null;
-                    let webcamMirrorStartPos = { x: 0, y: 0 };
+                    // Long press for mirror toggle (removed single click)
+                    let webcamLongPressTimer = null;
+                    let webcamLongPressStarted = false;
                     
-                    function startWebcamMirrorInPanMode(e) {
-                        if (!window.isWebcamPanZoomMode) return;
-                        
-                        // Record starting position for movement tolerance
-                        const isTouch = !!e.touches;
-                        webcamMirrorStartPos.x = isTouch ? e.touches[0].clientX : e.clientX;
-                        webcamMirrorStartPos.y = isTouch ? e.touches[0].clientY : e.clientY;
-                        
-                        webcamMirrorTimer = setTimeout(() => {
-                            // Check if we haven't moved too much
+                    function startWebcamLongPress(e) {
+                        if (window.isWebcamPanZoomMode || webcamWidgetDragInProgress || webcam_transform.scale > 1) return;
+                        webcamLongPressStarted = true;
+                        webcamLongPressTimer = setTimeout(() => {
+                            if (webcamLongPressStarted) {
                                 videoWrapper.classList.toggle('normal-view');
-                            // Visual feedback
+                                // Brief visual feedback
                                 videoWrapper.style.filter = 'brightness(1.3)';
                                 setTimeout(() => videoWrapper.style.filter = '', 150);
-                            
-                            // Haptic feedback if available
-                            if (navigator.vibrate) {
-                                navigator.vibrate(50);
                             }
-                        }, 800); // Long press in pan mode
+                        }, 500); // 500ms long press
                     }
                     
-                    function checkWebcamMirrorMoveInPanMode(e) {
-                        if (!webcamMirrorTimer) return;
-                        
-                        const isTouch = !!e.touches;
-                        const currentX = isTouch ? e.touches[0].clientX : e.clientX;
-                        const currentY = isTouch ? e.touches[0].clientY : e.clientY;
-                        
-                        const moveDistance = Math.hypot(
-                            currentX - webcamMirrorStartPos.x,
-                            currentY - webcamMirrorStartPos.y
-                        );
-                        
-                        // Cancel mirror if movement is too much
-                        if (moveDistance > 20) {
-                            clearTimeout(webcamMirrorTimer);
-                            webcamMirrorTimer = null;
+                    function cancelWebcamLongPress() {
+                        webcamLongPressStarted = false;
+                        if (webcamLongPressTimer) {
+                            clearTimeout(webcamLongPressTimer);
+                            webcamLongPressTimer = null;
                         }
                     }
                     
-                    function cancelWebcamMirrorInPanMode() {
-                        if (webcamMirrorTimer) {
-                            clearTimeout(webcamMirrorTimer);
-                            webcamMirrorTimer = null;
-                        }
-                    }
+                    videoWrapper.addEventListener('mousedown', startWebcamLongPress);
+                    videoWrapper.addEventListener('mouseup', cancelWebcamLongPress);
+                    videoWrapper.addEventListener('mousemove', cancelWebcamLongPress);
+                    videoWrapper.addEventListener('mouseleave', cancelWebcamLongPress);
+                    videoWrapper.addEventListener('touchstart', startWebcamLongPress);
+                    videoWrapper.addEventListener('touchmove', cancelWebcamLongPress, { passive: true });
+                    videoWrapper.addEventListener('touchend', cancelWebcamLongPress);
+                    videoWrapper.addEventListener('touchcancel', cancelWebcamLongPress);
                     
                     videoWrapper.addEventListener('wheel', (e) => {
                         if (!window.isWebcamPanZoomMode) return;
@@ -1450,13 +1332,11 @@
                     let touchGestureState = {};
                     videoWrapper.addEventListener('touchstart', (e) => {
                         if (!window.isWebcamPanZoomMode) return;
-                        cancelWebcamMirrorInPanMode(); // Cancel any ongoing mirror
+                        cancelWebcamLongPress(); // Cancel any ongoing long press
                         e.stopPropagation();
                         touchGestureState.startTransform = { ...webcam_transform };
                         if (e.touches.length === 1) {
                             touchGestureState.startTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                            // Start mirror timer for single touch
-                            startWebcamMirrorInPanMode(e);
                         } else if (e.touches.length === 2) {
                             touchGestureState.initialPinchDist = get_touch_dist(e.touches);
                         }
@@ -1466,10 +1346,6 @@
                         if (!window.isWebcamPanZoomMode || !touchGestureState.startTransform) return;
                         e.preventDefault();
                         e.stopPropagation();
-                        
-                        // Check for mirror gesture movement cancellation
-                        checkWebcamMirrorMoveInPanMode(e);
-                        
                         if (e.touches.length === 2 && touchGestureState.initialPinchDist) {
                             webcam_transform.scale = Math.max(1.0, touchGestureState.startTransform.scale * (get_touch_dist(e.touches) / touchGestureState.initialPinchDist));
                         } else if (e.touches.length === 1 && touchGestureState.startTouch && webcam_transform.scale > 1) {
@@ -1496,24 +1372,14 @@
 
                     videoWrapper.addEventListener('touchend', () => {
                         if (!window.isWebcamPanZoomMode) return;
-                        cancelWebcamMirrorInPanMode(); // Cancel mirror timer on touch end
                         if(touchGestureState.startTransform) webcamPlayer.savePanZoomState();
                         touchGestureState = {};
                     });
 
-                    // Mouse panning and mirror toggle in pan mode
+                    // Mouse panning on videoWrapper instead of canvas
                     videoWrapper.addEventListener('mousedown', (e) => {
-                        if (!window.isWebcamPanZoomMode) return;
-                        
-                        cancelWebcamMirrorInPanMode(); // Cancel any ongoing mirror
-                        
-                        if (webcam_transform.scale <= 1) {
-                            // When not zoomed, only allow mirror toggle
-                            startWebcamMirrorInPanMode(e);
-                            return;
-                        }
-                        
-                        // When zoomed in, allow panning
+                        if (!window.isWebcamPanZoomMode || webcam_transform.scale <= 1) return; // Only when zoomed in
+                        cancelWebcamLongPress(); // Cancel any ongoing long press
                         e.preventDefault();
                         e.stopPropagation();
                         webcamPanMouse = { isDown: true, startX: e.clientX, startY: e.clientY, startPanX: webcam_transform.panX, startPanY: webcam_transform.panY };
@@ -1553,19 +1419,6 @@
                             document.removeEventListener('mousemove', webcamPanMouseMove);
                         }
                     }
-
-                    // Mouse events for mirror toggle in pan mode (when not zoomed)
-                    videoWrapper.addEventListener('mousemove', (e) => {
-                        if (window.isWebcamPanZoomMode && webcam_transform.scale <= 1) {
-                            checkWebcamMirrorMoveInPanMode(e);
-                        }
-                    });
-
-                    videoWrapper.addEventListener('mouseup', () => {
-                        if (window.isWebcamPanZoomMode && webcam_transform.scale <= 1) {
-                            cancelWebcamMirrorInPanMode();
-                        }
-                    });
                 })();
                 
                 (function setupBaseFeatures() {
@@ -1614,7 +1467,7 @@
                     initializeWidgetToggles();
                     webcamToggleBtn.addEventListener('click', (e) => {
                         const btn = e.currentTarget;
-                        if (btn.hasMoved) return;
+                        if (btn.dataset.justDragged === 'true') return;
                         if (window.webcamPlayer.stream) {
                             window.webcamPlayer.stop();
                         } else {
@@ -1626,9 +1479,9 @@
                     const weatherElems = { t: document.getElementById('temperature'), i: document.getElementById('weather-icon') };
                     const weatherLocationInput = document.getElementById('weather-location-input');
                     let clockScale = 1;
-                    const getweatherLocation = () => localStorage.getItem('lockscreenWeatherLocation') || '';
+                    const getWeatherLocation = () => localStorage.getItem('lockscreenWeatherLocation') || '';
                     const fetchWeather = () => {
-                        const location = getweatherLocation();
+                        const location = getWeatherLocation();
                         weatherLocationInput.value = location;
                         const url = `https://wttr.in/${location || 'Trondheim'}?format=j1`;
                         const iM = { 'sunny': 'fa-sun', 'clear': 'fa-sun', 'partly cloudy': 'fa-cloud-sun', 'cloudy': 'fa-cloud', 'overcast': 'fa-cloud', 'mist': 'fa-smog', 'fog': 'fa-smog', 'patchy rain': 'fa-cloud-rain', 'rain': 'fa-cloud-showers-heavy', 'drizzle': 'fa-cloud-rain', 'patchy snow': 'fa-snowflake', 'snow': 'fa-snowflake', 'sleet': 'fa-cloud-meatball', 'ice pellets': 'fa-icicles', 'thunder': 'fa-cloud-bolt', 'blizzard': 'fa-wind' };
@@ -1706,7 +1559,8 @@
                         
                         const stD = (e) => {
                             if (!isD && !isPinching) return;
-                            e.target.hasMoved = hasMoved;
+                            // Mark on element instead of event target
+                            el.dataset.justDragged = hasMoved ? 'true' : 'false';
                             if (el.id === 'fun-stock-name-display' && el.classList.contains('visible')) { 
                                 stockNameFadeOutTimer = setTimeout(() => { el.classList.remove('visible'); }, 3000); 
                             }
@@ -1739,7 +1593,7 @@
                             
                             isD = true; 
                             hasMoved = false; 
-                            e.target.hasMoved = false;
+                            el.dataset.justDragged = 'false';
                             
                             let cX, cY;
                             if (e.touches && e.touches.length > 0) {
@@ -1770,22 +1624,21 @@
                         }
                         if(el.id === 'settings-btn') { 
                             el.addEventListener('click', (e) => { if (!hasMoved) { showWallpaperSettings(); settingsMenu.classList.add('visible'); } }); 
+                            el.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !hasMoved) { e.preventDefault(); showWallpaperSettings(); settingsMenu.classList.add('visible'); } });
                         }
                     };
                     
                     stockWidget.addEventListener('click', (e) => {
-                        if (e.target.hasMoved) return;
+                        if (stockWidget.dataset.justDragged === 'true') return;
                         clearTimeout(stockWidgetClickTimer);
                         stockWidgetClickTimer = setTimeout(() => {
                             if (!getStockFlashState()) return;
-                            const apiKey = getFinnhubApiKey();
-                            if (!apiKey) return; // Skip if no API key
                             const symbols = getStockSymbols();
                             if (symbols.length === 0) return;
                             const symbol = symbols[stockFlashIndex];
                             stockFlashIndex = (stockFlashIndex + 1) % symbols.length;
-                            fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`)
-                                .then(r => r.json()).then(data => handleStockData(data, symbol))
+                            fetchQuoteNoKey(symbol)
+                                .then(data => handleStockData(data, symbol))
                                 .catch(err => console.error(`Stock Flash click trigger error for ${symbol}:`, err));
                         }, 200);
                     });
@@ -1794,23 +1647,10 @@
                         stockSymbolsInput.value = getStockSymbols().join(', ');
                         stockFlashCheckbox.checked = getStockFlashState();
                         stockEditorMenu.classList.add('visible');
-                        
-                        // Show API key prompt if no key is set
-                        if (requiresFinnhubApiKey()) {
-                            showStockApiKeyPrompt();
-                        } else {
-                            hideStockApiKeyPrompt();
-                        }
                     });
                     closeStockEditorBtn.addEventListener('click', () => stockEditorMenu.classList.remove('visible'));
                     stockEditorMenu.addEventListener('click', (e) => { if (e.target === stockEditorMenu) stockEditorMenu.classList.remove('visible'); });
                     saveStocksBtn.addEventListener('click', () => { 
-                        // Check for API key first
-                        if (requiresFinnhubApiKey()) {
-                            showStockApiKeyPrompt();
-                            return;
-                        }
-                        
                         const newSymbols = stockSymbolsInput.value.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0).slice(0, 7); 
                         saveStockSymbols(newSymbols); 
                         saveStockFlashState(stockFlashCheckbox.checked); 
@@ -1824,8 +1664,9 @@
                     
                     loadPos();
                     fetchWeather(); setInterval(fetchWeather, 30 * 60 * 1000);
-                    updateStockWidget(); setInterval(updateStockWidget, 60000);
-                    checkStockFlashTrigger(); setInterval(checkStockFlashTrigger, 60 * 1000);
+                    // Slower intervals to be polite to the proxy and avoid rate limiting
+                    updateStockWidget(); setInterval(updateStockWidget, 5 * 60 * 1000);
+                    checkStockFlashTrigger(); setInterval(checkStockFlashTrigger, 5 * 60 * 1000);
                 })();
                 
                 function generateSquareArt(image, callback) {
@@ -1914,7 +1755,7 @@
                         // Only stop dragging, but keep pan mode active for 3 seconds
                         isDraggingWp = false; 
                         document.removeEventListener('mousemove', panMove); 
-                        document.removeEventListener('touchmove', panMove); 
+                        document.removeEventListener('touchmove', panMove);
                         
                         // Save position after dragging ends
                         const url = currentWallpaperImg.src;
@@ -2053,45 +1894,23 @@
                 fontSelect.addEventListener('change', () => { const newFont = fontSelect.value; localStorage.setItem('lockscreenClockFont', newFont); applyFont(newFont); });
 
                 resetPositionsBtn.addEventListener('click', () => {
-                    // Clear widget positions and content
                     localStorage.removeItem('lockscreenItemPositions_v5');
                     localStorage.removeItem('lockscreenNoteContent');
                     localStorage.removeItem('lockscreenNoteFontFamily');
                     localStorage.removeItem('lockscreenNoteFontSize');
                     localStorage.removeItem('lockscreenGifUrls_v2');
                     localStorage.removeItem('lockscreenLastGif');
-                    
-                    // Clear API keys
-                    localStorage.removeItem('imgbbApiKey');
-                    localStorage.removeItem('finnhubApiKey');
-                    
-                    // Clear other stored data
-                    localStorage.removeItem('lockscreenStockSymbols');
-                    localStorage.removeItem('lockscreenStockFlashEnabled');
                     localStorage.removeItem('webcamFullState');
                     localStorage.removeItem('webcamPanZoomState');
-                    localStorage.removeItem('lockscreenWallpapers_v2');
-                    localStorage.removeItem('lockscreenLastSelectedWp');
-                    
-                    // Reset components
                     window.radioPlayer.reset();
                     window.webcamPlayer.stop();
                     document.getElementById('gif-display').src = '';
-                    
-                    // Reset widget positions
                     ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.cssText = '';
                     });
-                    
-                    // Reset clock scale
-                    const applyClockScale = (scale) => { clockScale = scale; const baseSizeVW = 15; const newSize = baseSizeVW * scale; document.getElementById('hours').style.fontSize = `clamp(${newSize * 0.4}rem, ${newSize}vw, ${newSize * 0.8}rem)`; document.getElementById('minutes').style.fontSize = `clamp(${newSize * 0.4}rem, ${newSize}vw, ${newSize * 0.8}rem)`; };
+                    // Use existing applyClockScale
                     applyClockScale(1);
-                    
-                    // Reset stock widget to show API key prompt
-                    updateStockWidget();
-                    
-                    // Close settings
                     settingsMenu.classList.remove('visible');
                 });
 
@@ -2101,22 +1920,6 @@
                     const qrCodeContainer = document.getElementById('qr-code');
                     qrCodeContainer.innerHTML = '';
                     qrModal.style.display = 'flex';
-                    
-                    // Update QR modal text based on type
-                    const qrTitle = document.querySelector('#qr-modal-content h2');
-                    const qrDescription = document.querySelector('#qr-modal-content p');
-                    
-                    if (type === 'imgbb-api-key') {
-                        qrTitle.textContent = 'Enter ImageBB API Key';
-                        qrDescription.textContent = 'Scan to enter your ImageBB API key from your phone.';
-                    } else if (type === 'finnhub-api-key') {
-                        qrTitle.textContent = 'Enter Finnhub API Key';
-                        qrDescription.textContent = 'Scan to enter your Finnhub API key from your phone.';
-                    } else {
-                        qrTitle.textContent = 'Scan with your phone';
-                        qrDescription.textContent = 'Scan to send an image URL from your phone.';
-                    }
-                    
                     new QRCode(qrCodeContainer, { text: uploadUrl, width: 200, height: 200 });
 
                     pollingInterval = setInterval(() => {
@@ -2127,39 +1930,12 @@
                                     clearInterval(pollingInterval);
                                     pollingInterval = null;
                                     qrModal.style.display = 'none';
-                                    const receivedData = data[session];
+                                    const newUrl = data[session];
 
-                                    if (type === 'imgbb-api-key') {
-                                        localStorage.setItem('imgbbApiKey', receivedData);
-                                        // Hide ImageBB API key prompt and show success
-                                        const apiKeyPrompt = document.getElementById('imgbb-api-key-prompt');
-                                        const regularUploadUI = document.getElementById('regular-upload-ui');
-                                        if (apiKeyPrompt && regularUploadUI) {
-                                            apiKeyPrompt.style.display = 'none';
-                                            regularUploadUI.style.display = 'flex';
-                                        }
-                                        const statusElem = document.getElementById('upload-status');
-                                        if (statusElem) {
-                                            statusElem.textContent = "ImageBB API Key saved!";
-                                            setTimeout(() => statusElem.textContent = '', 3000);
-                                        }
-                                    } else if (type === 'finnhub-api-key') {
-                                        localStorage.setItem('finnhubApiKey', receivedData);
-                                        // Hide Finnhub API key prompt and update stock widget
-                                        const finnhubPrompt = document.getElementById('finnhub-api-key-prompt');
-                                        const stockRegularUI = document.getElementById('stock-regular-ui');
-                                        if (finnhubPrompt && stockRegularUI) {
-                                            finnhubPrompt.style.display = 'none';
-                                            stockRegularUI.style.display = 'flex';
-                                        }
-                                        // Update stock widget if the function exists
-                                        if (typeof updateStockWidget === 'function') {
-                                            updateStockWidget();
-                                        }
-                                    } else if (type === 'gif') {
-                                        window.addGif(receivedData);
+                                    if (type === 'gif') {
+                                        window.addGif(newUrl);
                                     } else {
-                                        const newWp = { url: receivedData, position: 'center center' };
+                                        const newWp = { url: newUrl, position: 'center center' };
                                         const wps = getWps();
                                         if (!wps.some(w => w.url === newWp.url)) { wps.push(newWp); saveWps(wps); }
                                         setWp(newWp); localStorage.setItem('lockscreenLastSelectedWp', newWp.url); renderWpChoices();
