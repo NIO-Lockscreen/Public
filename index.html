@@ -50,6 +50,16 @@
         #note-widget.edit-mode #note-settings-btn { display: flex; }
 
         #music-widget { top: 45%; left: 10%; width: 300px; display: flex; flex-direction: column; justify-content: center; }
+        /* Music Visualizer Widget */
+        #music-visualizer-widget { top: 70%; left: 10%; width: 320px; height: 140px; padding: 0; overflow: hidden; position: absolute; resize: both; min-width: 180px; min-height: 90px; }
+        #music-visualizer-canvas { width: 100%; height: 100%; display: block; }
+        #music-visualizer-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; background-color: rgba(0,0,0,0.35); color: #fff; text-shadow: var(--text-shadow); font-weight: 500; user-select: none; }
+        #music-visualizer-overlay i { font-size: 1.4rem; opacity: 0.9; }
+        /* Circle mode: hide blurred box and make circular */
+        #music-visualizer-widget.circle-mode { background-color: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-radius: 50%; resize: none; }
+        #music-visualizer-widget.circle-mode #music-visualizer-canvas { border-radius: 50%; }
+        #music-visualizer-widget.circle-mode #music-visualizer-overlay { background-color: transparent; }
+        #music-visualizer-resize-box { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; border: 1.5px dashed rgba(255,255,255,0.7); border-radius: 10px; display: none !important; align-items: center; justify-content: center; color: rgba(255,255,255,0.9); cursor: nwse-resize; user-select: none; }
         #music-info-container { display: flex; gap: 12px; align-items: center; }
         #music-album-art { width: 60px; height: 60px; background-size: cover; background-position: center; border-radius: 8px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 2rem; background-color: rgba(0,0,0,0.2); }
         #music-details { text-align: left; overflow: hidden; }
@@ -207,6 +217,11 @@
                 <i id="music-next" class="fa-solid fa-forward-step"></i>
             </div>
         </div>
+        <div id="music-visualizer-widget" class="draggable-item widget" title="Tap to start/stop microphone visualizer">
+            <canvas id="music-visualizer-canvas"></canvas>
+            <div id="music-visualizer-overlay"><i class="fa-solid fa-microphone"></i><span>Tap to start</span></div>
+            <div id="music-visualizer-resize-box"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+        </div>
         <div id="gif-widget" class="draggable-item" title="Click to add GIF | Double-click to choose">
             <i id="gif-widget-placeholder" class="fa-solid fa-image"></i>
             <img id="gif-display" alt="Selected GIF">
@@ -247,6 +262,7 @@
                     <div class="setting-toggle"><label for="toggle-stock-widget">Stock Widget</label><input type="checkbox" id="toggle-stock-widget"></div>
                     <div class="setting-toggle"><label for="toggle-note-widget">Note Widget</label><input type="checkbox" id="toggle-note-widget"></div>
                     <div class="setting-toggle"><label for="toggle-music-widget">Music Widget</label><input type="checkbox" id="toggle-music-widget"></div>
+                     <div class="setting-toggle"><label for="toggle-music-visualizer-widget">Music Visualizer</label><input type="checkbox" id="toggle-music-visualizer-widget"></div>
                     <div class="setting-toggle"><label for="toggle-gif-widget">GIF Widget</label><input type="checkbox" id="toggle-gif-widget"></div>
                     <div class="setting-toggle"><label for="toggle-webcam-widget">Rear Seat Cam</label><input type="checkbox" id="toggle-webcam-widget"></div>
                 </div>
@@ -455,59 +471,49 @@
                     triggerStockFlashEffect(isUp, isSuper, symbol);
                 }
                 
-                // Fetch stock quote without API key using Yahoo Finance (with proxies) and cache
+                // Fetch stock quote without API key using Stooq daily CSV via multiple proxies; returns last close and previous close
                 function fetchQuoteNoKey(symbol) {
-                    const proxies = [
-                        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                        (url) => `https://cors.isomorphic-git.org/${url}`,
-                        (url) => `https://thingproxy.freeboard.io/fetch/${url}`
+                    const stooqSym = (symbol.includes('.') ? symbol : `${symbol}.us`).toLowerCase();
+                    const stooqDailyList = `https://stooq.com/q/d/l/?s=${encodeURIComponent(stooqSym)}&i=d`;
+                    const proxyWraps = [
+                        (u) => `https://r.jina.ai/http/${u.replace(/^https?:\/\//, '')}`,
+                        (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+                        (u) => `https://cors.isomorphic-git.org/${u}`,
+                        (u) => `https://thingproxy.freeboard.io/fetch/${u}`
                     ];
-                    const yUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
 
-                    const parseYahoo = (j) => {
-                        const q = j && j.quoteResponse && j.quoteResponse.result && j.quoteResponse.result[0];
-                        if (!q) return null;
-                        const current = firstNumber(q.regularMarketPrice, q.postMarketPrice, q.preMarketPrice, q.previousClose);
-                        const open = firstNumber(q.regularMarketOpen, q.previousClose);
-                        const prevClose = typeof q.previousClose === 'number' ? q.previousClose : undefined;
-                        if (typeof current !== 'number') return null;
-                        return { c: current, o: (typeof open === 'number' ? open : current), p: prevClose };
+                    const parseStooqSeries = (csv) => {
+                        const lines = csv.trim().split(/\r?\n/);
+                        if (lines.length < 2) return null;
+                        // Remove header line
+                        const rows = lines.slice(1).filter(Boolean);
+                        const lastRow = rows[rows.length - 1].split(',');
+                        const prevRow = rows.length > 1 ? rows[rows.length - 2].split(',') : null;
+                        const openToday = parseFloat(lastRow[3]);
+                        const closeToday = parseFloat(lastRow[6]);
+                        const prevClose = prevRow ? parseFloat(prevRow[6]) : undefined;
+                        if (Number.isNaN(closeToday)) return null;
+                        return {
+                            c: closeToday,
+                            // Use previous close as the reference if market is open/unknown; provides day-change direction
+                            o: Number.isNaN(openToday) ? (typeof prevClose === 'number' ? prevClose : closeToday) : openToday,
+                            p: typeof prevClose === 'number' ? prevClose : closeToday
+                        };
                     };
 
-                    const firstNumber = (...vals) => {
-                        for (const v of vals) { if (typeof v === 'number' && !Number.isNaN(v)) return v; }
-                        return undefined;
-                    };
-
-                    const tryProxies = async () => {
-                        for (const wrap of proxies) {
+                    const tryFetch = async () => {
+                        for (const wrap of proxyWraps) {
                             try {
-                                const res = await fetch(wrap(yUrl));
-                                const text = await res.text();
-                                // Yahoo returns JSON; ensure we parse text safely
-                                const json = JSON.parse(text);
-                                const parsed = parseYahoo(json);
+                                const res = await fetch(wrap(stooqDailyList));
+                                const csv = await res.text();
+                                const parsed = parseStooqSeries(csv);
                                 if (parsed) return parsed;
                             } catch (_) { /* try next proxy */ }
                         }
-                        // Fallback: Stooq daily close (last available)
-                        try {
-                            const stooqSym = (symbol.includes('.') ? symbol : `${symbol}.us`).toLowerCase();
-                            const stooqUrl = `https://stooq.com/q/l/?s=${encodeURIComponent(stooqSym)}&i=d`;
-                            const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(stooqUrl)}`);
-                            const csv = await res.text();
-                            // CSV format: Symbol,Date,Time,Open,High,Low,Close,Volume
-                            const line = csv.trim().split(/\r?\n/)[1] || '';
-                            const parts = line.split(',');
-                            const close = parseFloat(parts[6]);
-                            if (!Number.isNaN(close)) {
-                                return { c: close, o: close, p: close };
-                            }
-                        } catch (_) {}
                         return null;
                     };
 
-                    return tryProxies().then(data => {
+                    return tryFetch().then(data => {
                         if (data) saveCachedQuote(symbol, data);
                         return data || getCachedQuote(symbol);
                     });
@@ -543,7 +549,7 @@
                     if (symbols.length === 0) return;
                     symbols.forEach(symbol => {
                         const row = document.createElement('div'); row.className = 'stock-row';
-                        row.innerHTML = `<div class="stock-info"><i class="fa-solid"></i> ${symbol}</div><span class="stock-price">...</span>`;
+                        row.innerHTML = `<div class="stock-info"><i class="fa-solid"></i> ${symbol}</div><span class="stock-price" aria-live="polite">...</span>`;
                         stockWidget.appendChild(row);
                         fetchQuoteNoKey(symbol).then(data => {
                             const priceEl = row.querySelector('.stock-price');
@@ -824,6 +830,482 @@
                     closeGifChooserBtn.addEventListener('click', () => gifChooserMenu.classList.remove('visible'));
                     window.addGif = addGif;
                     renderCurrentGif();
+
+                     // Music Visualizer (Microphone)
+                     const mv = {
+                         audioCtx: null,
+                         analyser: null,
+                         dataArray: null,
+                         timeArray: null,
+                         stream: null,
+                         rafId: null,
+                         level: 0,
+                         mode: (localStorage.getItem('musicVisualizerMode') || 'bars'),
+                         _clickTimer: null,
+                         _tapCount: 0,
+                         _tapTimer: null,
+                         _singleTapTimer: null,
+                         _suppressClickOnce: false,
+                          // Mute arc state for circle mode
+                          muteArcStart: null, // radians 0..2π
+                          muteArcEnd: null,   // radians 0..2π
+                          // Long-press detection
+                          _lpTimer: null,
+                          _lpMoved: false,
+                          _lpTriggered: false,
+                          _lpStart: { x: 0, y: 0 },
+                         elements: {
+                             widget: document.getElementById('music-visualizer-widget'),
+                             canvas: document.getElementById('music-visualizer-canvas'),
+                             overlay: document.getElementById('music-visualizer-overlay')
+                         },
+                         init() {
+                             if (!this.elements.widget) return;
+                             // Apply initial mode class
+                             this.applyModeClass();
+                              // Load persisted mute arc
+                              try {
+                                  const saved = JSON.parse(localStorage.getItem('musicVisualizerMuteArc'));
+                                  if (saved && typeof saved.start === 'number' && typeof saved.end === 'number') {
+                                      this.muteArcStart = this.normalizeAngle(saved.start);
+                                      this.muteArcEnd = this.normalizeAngle(saved.end);
+                                  }
+                              } catch {}
+                             // Click with delay to allow dblclick detection
+                             this.elements.widget.addEventListener('click', (e) => {
+                                 if (this.elements.widget.dataset.justDragged === 'true') return;
+                                 if (this._suppressClickOnce) { this._suppressClickOnce = false; return; }
+                                 clearTimeout(this._clickTimer);
+                                 this._clickTimer = setTimeout(() => {
+                                     // Always-on behavior: only start if not running; do not stop on click
+                                     if (!this.stream) this.start();
+                                 }, 250);
+                             });
+                             // Mouse double click toggles mode
+                             this.elements.widget.addEventListener('dblclick', (e) => {
+                                 e.preventDefault();
+                                 clearTimeout(this._clickTimer);
+                                 this.toggleMode();
+                                 this._suppressClickOnce = true;
+                             });
+                             // Touch: single tap toggles mic immediately (for gesture compliance), double-tap toggles mode
+                             this.elements.widget.addEventListener('touchstart', (e) => {
+                                 if (e.touches.length !== 1) return;
+                                 // mark to suppress synthetic click
+                                 this._suppressClickOnce = true;
+                                  // prepare long-press for arc marking (circle mode only)
+                                  if (this.mode === 'circle') {
+                                      const t = e.touches[0];
+                                      this._lpStart = { x: t.clientX, y: t.clientY };
+                                      this._lpMoved = false;
+                                      this._lpTriggered = false;
+                                      clearTimeout(this._lpTimer);
+                                      this._lpTimer = setTimeout(() => {
+                                          this._lpTriggered = true;
+                                          this.handleLongPress(this._lpStart.x, this._lpStart.y);
+                                      }, 600);
+                                  }
+                             }, { passive: true });
+                              this.elements.widget.addEventListener('touchmove', (e) => {
+                                  if (!this._lpTimer) return;
+                                  const t = e.touches && e.touches[0];
+                                  if (!t) return;
+                                  const dx = t.clientX - this._lpStart.x;
+                                  const dy = t.clientY - this._lpStart.y;
+                                  if (Math.hypot(dx, dy) > 15) {
+                                      this._lpMoved = true;
+                                      clearTimeout(this._lpTimer);
+                                      this._lpTimer = null;
+                                  }
+                              }, { passive: true });
+                             this.elements.widget.addEventListener('touchend', (e) => {
+                                  if (this._lpTimer) { clearTimeout(this._lpTimer); this._lpTimer = null; }
+                                  if (this._lpTriggered) {
+                                      // consume this gesture; do not treat as tap
+                                      this._lpTriggered = false;
+                                      this._tapCount = 0;
+                                      e.preventDefault();
+                                      return;
+                                  }
+                                  this._tapCount++;
+                                 if (this._tapCount === 1) {
+                                     // perform single-tap action immediately to keep user gesture
+                                      if (this.elements.widget.dataset.justDragged !== 'true' && !this.stream) this.start();
+                                     this._tapTimer = setTimeout(() => { this._tapCount = 0; }, 320);
+                                 } else if (this._tapCount === 2) {
+                                     clearTimeout(this._tapTimer);
+                                     this._tapCount = 0;
+                                     this.toggleMode();
+                                 }
+                                 e.preventDefault();
+                             }, { passive: false });
+                              // Mouse long-press for arc marking
+                              this.elements.widget.addEventListener('mousedown', (e) => {
+                                  if (e.button !== 0) return;
+                                  if (this.mode !== 'circle') return;
+                                  if (this.isMouseHeld) return; // resizing intent
+                                  this._lpStart = { x: e.clientX, y: e.clientY };
+                                  this._lpMoved = false;
+                                  this._lpTriggered = false;
+                                  const move = (ev) => {
+                                      const dx = ev.clientX - this._lpStart.x;
+                                      const dy = ev.clientY - this._lpStart.y;
+                                      if (Math.hypot(dx, dy) > 8) {
+                                          this._lpMoved = true;
+                                          clearTimeout(this._lpTimer);
+                                          this._lpTimer = null;
+                                          cleanup();
+                                      }
+                                  };
+                                  const up = () => { clearTimeout(this._lpTimer); this._lpTimer = null; cleanup(); };
+                                  const cleanup = () => {
+                                      document.removeEventListener('mousemove', move);
+                                      document.removeEventListener('mouseup', up);
+                                  };
+                                  document.addEventListener('mousemove', move);
+                                  document.addEventListener('mouseup', up, { once: true });
+                                  clearTimeout(this._lpTimer);
+                                  this._lpTimer = setTimeout(() => {
+                                      this._lpTriggered = true;
+                                      this.handleLongPress(this._lpStart.x, this._lpStart.y);
+                                      cleanup();
+                                  }, 600);
+                              });
+                             
+                             window.addEventListener('resize', () => this.resizeCanvas(), { passive: true });
+                             if ('ResizeObserver' in window) {
+                                 const ro = new ResizeObserver(() => {
+                                     // Ignore outer resize in circle mode to avoid fighting center resize
+                                     if (this.mode !== 'circle') { this.resizeCanvas(); this.persistSize(); }
+                                 });
+                                     ro.observe(this.elements.widget);
+                                 this._ro = ro;
+                             }
+                             // Mouse-hold + wheel to resize (both modes)
+                             this.isMouseHeld = false;
+                             this.elements.widget.addEventListener('mousedown', (e) => { if (e.button === 0) this.isMouseHeld = true; });
+                             document.addEventListener('mouseup', () => { this.isMouseHeld = false; });
+                             this.elements.widget.addEventListener('mouseleave', () => { this.isMouseHeld = false; });
+                             this.elements.widget.addEventListener('wheel', (e) => {
+                                 if (!this.isMouseHeld) return;
+                                 e.preventDefault();
+                                 const currentW = this.elements.widget.offsetWidth || 200;
+                                 const currentH = this.elements.widget.offsetHeight || 200;
+                                 const oldLeft = this.elements.widget.offsetLeft;
+                                 const oldTop = this.elements.widget.offsetTop;
+                                 const base = Math.min(currentW, currentH);
+                                 const step = Math.max(8, Math.round(base * 0.08));
+                                 const delta = e.deltaY < 0 ? step : -step;
+                                 if (this.mode === 'circle') {
+                                     const newSize = Math.max(80, Math.min(2000, base + delta));
+                                     this.elements.widget.style.width = `${newSize}px`;
+                                     this.elements.widget.style.height = `${newSize}px`;
+                                     const dW = newSize - currentW;
+                                     const dH = newSize - currentH;
+                                     this.elements.widget.style.left = `${oldLeft - dW / 2}px`;
+                                     this.elements.widget.style.top = `${oldTop - dH / 2}px`;
+                                 } else {
+                                     const newW = Math.max(120, Math.min(3000, currentW + delta));
+                                     const newH = Math.max(90, Math.min(2000, currentH + delta));
+                                     this.elements.widget.style.width = `${newW}px`;
+                                     this.elements.widget.style.height = `${newH}px`;
+                                     const dW = newW - currentW;
+                                     const dH = newH - currentH;
+                                     this.elements.widget.style.left = `${oldLeft - dW / 2}px`;
+                                     this.elements.widget.style.top = `${oldTop - dH / 2}px`;
+                                 }
+                                 this.persistSize();
+                                 this.resizeCanvas();
+                             }, { passive: false });
+                             this.resizeCanvas();
+                         },
+                         toggleMic() { if (!this.stream) { this.start(); } },
+                         applyModeClass() {
+                             this.elements.widget.classList.toggle('circle-mode', this.mode === 'circle');
+                             // In circle mode, we handle resize with custom center box
+                             if (this.mode === 'circle') {
+                                 this.enableCenterResize();
+                             } else {
+                                 this.disableCenterResize();
+                             }
+                         },
+                         toggleMode() {
+                             this.mode = this.mode === 'circle' ? 'bars' : 'circle';
+                             localStorage.setItem('musicVisualizerMode', this.mode);
+                             this.applyModeClass();
+                             if (this.mode === 'circle') {
+                                 // Enforce square while keeping the visual center in place
+                                 const w = this.elements.widget.offsetWidth || 200;
+                                 const h = this.elements.widget.offsetHeight || 200;
+                                 const oldLeft = this.elements.widget.offsetLeft;
+                                 const oldTop = this.elements.widget.offsetTop;
+                                 const size = Math.min(w, h);
+                                 const dW = size - w;
+                                 const dH = size - h;
+                                 this.elements.widget.style.width = `${size}px`;
+                                 this.elements.widget.style.height = `${size}px`;
+                                 this.elements.widget.style.left = `${oldLeft - dW / 2}px`;
+                                 this.elements.widget.style.top = `${oldTop - dH / 2}px`;
+                                 this.persistSize();
+                             }
+                             this.resizeCanvas();
+                         },
+                         enableCenterResize() {
+                             // No visible box; allow pinch on touch and wheel-resize while held (already implemented)
+                             // Keep method for mode toggling compatibility
+                         },
+                         disableCenterResize() {
+                             const box = document.getElementById('music-visualizer-resize-box');
+                             if (box) box.style.display = 'none';
+                             if (this._centerResizeCleanup) this._centerResizeCleanup();
+                         },
+                         resizeCanvas() {
+                             const c = this.elements.canvas; if (!c) return;
+                             const w = c.clientWidth, h = c.clientHeight;
+                             if (w && h && (c.width !== w || c.height !== h)) { c.width = w; c.height = h; }
+                         },
+                         persistSize() {
+                             try {
+                                 const positions = JSON.parse(localStorage.getItem('lockscreenItemPositions_v5')) || {};
+                                 const id = 'music-visualizer-widget';
+                                 positions[id] = positions[id] || {};
+                                 const widget = this.elements.widget;
+                                 const lock = document.getElementById('lock-screen');
+                                 positions[id].w = widget.style.width || widget.offsetWidth + 'px';
+                                 positions[id].h = widget.style.height || widget.offsetHeight + 'px';
+                                 if (lock && lock.clientWidth && lock.clientHeight) {
+                                     positions[id].t = `${(widget.offsetTop / lock.clientHeight) * 100}%`;
+                                     positions[id].l = `${(widget.offsetLeft / lock.clientWidth) * 100}%`;
+                                 }
+                                 localStorage.setItem('lockscreenItemPositions_v5', JSON.stringify(positions));
+                             } catch {}
+                         },
+                         async start() {
+                             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                                 this.setOverlay('Microphone not available');
+                                 return;
+                             }
+                             if (!window.isSecureContext) {
+                                 this.setOverlay('Requires HTTPS');
+                                 return;
+                             }
+                             try {
+                                 this.stream = await navigator.mediaDevices.getUserMedia({
+                                     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false }
+                                 });
+                                 this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                 const source = this.audioCtx.createMediaStreamSource(this.stream);
+                                 this.analyser = this.audioCtx.createAnalyser();
+                                 this.analyser.fftSize = 1024;
+                                 this.analyser.smoothingTimeConstant = 0.3; // more reactive for small sounds
+                                 source.connect(this.analyser);
+                                 this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                                 this.timeArray = new Uint8Array(this.analyser.fftSize);
+                                 this.elements.overlay.style.display = 'none';
+                                 this.draw();
+                             } catch (err) {
+                                 console.error('Mic error:', err);
+                                 this.setOverlay('Mic blocked');
+                                 this.stop(true);
+                             }
+                         },
+                          draw() {
+                             this.resizeCanvas();
+                             const c = this.elements.canvas; const ctx = c.getContext('2d');
+                             if (!this.analyser) return;
+                             this.rafId = requestAnimationFrame(() => this.draw());
+                             // Overall level from time-domain data for whole-widget reaction
+                             this.analyser.getByteTimeDomainData(this.timeArray);
+                             let sumSq = 0;
+                             for (let i = 0; i < this.timeArray.length; i++) {
+                                 const x = (this.timeArray[i] - 128) / 128;
+                                 sumSq += x * x;
+                             }
+                             const rms = Math.sqrt(sumSq / this.timeArray.length);
+                             const noiseFloor = 0.008; // lower floor to pick up small sounds
+                             const linear = Math.max(0, (rms - noiseFloor) * 6.0);
+                             const target = Math.min(1, Math.pow(linear, 0.7)); // compress to boost quiet parts
+                             const k = target > this.level ? 0.7 : 0.12; // faster attack, slightly faster release
+                             this.level += (target - this.level) * k;
+
+                             // Use some frequency data just for texture
+                             this.analyser.getByteFrequencyData(this.dataArray);
+                             ctx.clearRect(0, 0, c.width, c.height);
+
+                             if (this.mode === 'circle') {
+                                 this.drawCircle(ctx, c.width, c.height);
+                             } else {
+                                 this.drawBars(ctx, c.width, c.height);
+                             }
+                         },
+                          drawBars(ctx, width, height) {
+                              // Background pulse to make whole widget react
+                              const pulseAlpha = 0.06 + 0.20 * this.level;
+                              ctx.fillStyle = `rgba(255,255,255,${pulseAlpha.toFixed(3)})`;
+                              ctx.fillRect(0, 0, width, height);
+
+                             const barCount = 60; // more bars for perceived sensitivity
+                              const slice = Math.max(1, Math.floor(this.dataArray.length / barCount));
+                              const barW = width / barCount;
+                             const globalGain = 0.25 + 1.1 * this.level;
+                              const time = performance.now() * 0.002;
+                              for (let i = 0; i < barCount; i++) {
+                                  const base = this.dataArray[i * slice] / 255;
+                                 const wave = 0.35 * (0.5 + 0.5 * Math.sin(time + i * 0.5));
+                                 const v = Math.min(1, base * 0.75 + wave * 0.9) * globalGain;
+                                  const barH = v * height;
+                                  ctx.fillStyle = 'rgba(255,255,255,1)';
+                                  ctx.fillRect(i * barW, height - barH, barW - 2, barH);
+                              }
+                              const glow = Math.min(1, this.level * 2);
+                              ctx.fillStyle = `rgba(255,255,255,${(0.08 + 0.22 * glow).toFixed(3)})`;
+                              ctx.fillRect(0, 0, width, 3);
+                              ctx.fillRect(0, height - 3, width, 3);
+                          },
+                          normalizeAngle(a) { let x = a % (Math.PI * 2); return x < 0 ? x + Math.PI * 2 : x; },
+                          isAngleInArc(a, start, end) {
+                              a = this.normalizeAngle(a); start = this.normalizeAngle(start); end = this.normalizeAngle(end);
+                              if (start === end) return false;
+                              if (end > start) return a >= start && a <= end;
+                              // wrap-around case
+                              return a >= start || a <= end;
+                          },
+                          isAngleMuted(a) {
+                              if (typeof this.muteArcStart !== 'number' || typeof this.muteArcEnd !== 'number') return false;
+                              return this.isAngleInArc(a, this.muteArcStart, this.muteArcEnd);
+                          },
+                          handleLongPress(clientX, clientY) {
+                              // Map position to angle around the canvas center for alignment
+                              const rect = this.elements.canvas.getBoundingClientRect();
+                              const cx = rect.left + rect.width / 2;
+                              const cy = rect.top + rect.height / 2;
+                              // Angle 0 at +X axis; our radial bars are drawn outward from +X rotated by angle
+                              const angle = this.normalizeAngle(Math.atan2(clientY - cy, clientX - cx));
+                              // Sequence: set start -> set end -> clear both
+                              if (typeof this.muteArcStart !== 'number') {
+                                  this.muteArcStart = angle;
+                                  this.persistMuteArc();
+                                  this.flashOverlay('Start set');
+                              } else if (typeof this.muteArcEnd !== 'number') {
+                                  this.muteArcEnd = angle;
+                                  // If end equals start, treat as cleared
+                                  if (Math.abs(this.muteArcEnd - this.muteArcStart) < 0.01) { this.muteArcStart = null; this.muteArcEnd = null; }
+                                  this.persistMuteArc();
+                                  this.flashOverlay('End set');
+                              } else {
+                                  this.muteArcStart = null; this.muteArcEnd = null; this.persistMuteArc();
+                                  this.flashOverlay('Mute arc cleared');
+                              }
+                          },
+                          persistMuteArc() {
+                              try {
+                                  if (typeof this.muteArcStart === 'number' && typeof this.muteArcEnd === 'number') {
+                                      localStorage.setItem('musicVisualizerMuteArc', JSON.stringify({ start: this.muteArcStart, end: this.muteArcEnd }));
+                                  } else if (typeof this.muteArcStart === 'number' && typeof this.muteArcEnd !== 'number') {
+                                      localStorage.setItem('musicVisualizerMuteArc', JSON.stringify({ start: this.muteArcStart, end: this.muteArcStart }));
+                                  } else {
+                                      localStorage.removeItem('musicVisualizerMuteArc');
+                                  }
+                              } catch {}
+                          },
+                          flashOverlay(text) {
+                              const o = this.elements.overlay; if (!o) return;
+                              const span = o.querySelector('span');
+                              const prev = span ? span.textContent : '';
+                              if (span) span.textContent = text;
+                              const prevDisplay = o.style.display;
+                              o.style.display = 'flex';
+                              setTimeout(() => {
+                                  if (span) span.textContent = prev || 'Tap to start';
+                                  o.style.display = this.stream ? 'none' : 'flex';
+                              }, 800);
+                          },
+                          drawCircle(ctx, width, height) {
+                              const cx = width / 2, cy = height / 2;
+                              const radius = Math.min(cx, cy) * 0.58;
+                              const barCount = 80; // denser circle for small-sound response
+                              const slice = Math.max(1, Math.floor(this.dataArray.length / barCount));
+                              const time = performance.now() * 0.0025;
+                              const globalGain = 0.3 + 1.3 * this.level;
+
+                              // Soft pulsing center
+                              ctx.beginPath();
+                              ctx.arc(cx, cy, radius * (0.85 + 0.15 * this.level), 0, Math.PI * 2);
+                              ctx.fillStyle = `rgba(255,255,255,${(0.05 + 0.15 * this.level).toFixed(3)})`;
+                              ctx.fill();
+
+                              // Radial spikes
+                              ctx.save();
+                              ctx.translate(cx, cy);
+                              for (let i = 0; i < barCount; i++) {
+                                  const angle = (i / barCount) * Math.PI * 2;
+                                  if (this.isAngleMuted(angle)) continue;
+                                  const base = this.dataArray[i * slice] / 255;
+                                  const wave = 0.4 * (0.5 + 0.5 * Math.sin(time + i * 0.55));
+                                  const v = Math.min(1, base * 0.8 + wave * 1.0) * globalGain;
+                                  const barLen = v * radius;
+                                  ctx.save();
+                                  ctx.rotate(angle);
+                                  ctx.fillStyle = 'rgba(255,255,255,1)';
+                                  const w = Math.max(2, radius * 0.02);
+                                  // Draw along +X axis (radial) instead of +Y to remove 90° offset
+                                  ctx.fillRect(radius * 0.55, -w / 2, barLen, w);
+                                  ctx.restore();
+                              }
+                              ctx.restore();
+
+                              // Outer ring glow
+                              const glowAlpha = 0.08 + 0.25 * this.level;
+                              ctx.beginPath();
+                              ctx.arc(cx, cy, radius * (1.55 + 0.15 * this.level), 0, Math.PI * 2);
+                              ctx.strokeStyle = `rgba(255,255,255,${glowAlpha.toFixed(3)})`;
+                              ctx.lineWidth = Math.max(2, radius * 0.03);
+                              ctx.stroke();
+
+                              // Draw muted arc overlay if defined
+                              if (typeof this.muteArcStart === 'number' && typeof this.muteArcEnd === 'number' && this.muteArcStart !== this.muteArcEnd) {
+                                  const outerR = radius * 1.6;
+                                  const innerR = radius * 0.5;
+                                  const s = this.normalizeAngle(this.muteArcStart);
+                                  const e = this.normalizeAngle(this.muteArcEnd);
+                                  const drawSegment = (a1, a2) => {
+                                      ctx.beginPath();
+                                      ctx.moveTo(cx + Math.cos(a1) * innerR, cy + Math.sin(a1) * innerR);
+                                      ctx.arc(cx, cy, outerR, a1, a2, false);
+                                      ctx.arc(cx, cy, innerR, a2, a1, true);
+                                      ctx.closePath();
+                                      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                                      ctx.fill();
+                                  };
+                                  if (e > s) {
+                                      drawSegment(s, e);
+                                  } else {
+                                      // wrap-around: split into two segments [s, 2π] and [0, e]
+                                      drawSegment(s, Math.PI * 2);
+                                      if (e > 0) drawSegment(0, e);
+                                  }
+                              }
+                          },
+                         setOverlay(text) {
+                             this.elements.overlay.style.display = 'flex';
+                             const span = this.elements.overlay.querySelector('span');
+                             if (span) span.textContent = text;
+                         },
+                         stop(silent = false) {
+                             if (this.rafId) cancelAnimationFrame(this.rafId);
+                             this.rafId = null;
+                             if (this.stream) { try { this.stream.getAudioTracks().forEach(t => t.stop()); } catch {} }
+                             this.stream = null;
+                             if (this.audioCtx) { try { this.audioCtx.close(); } catch {} }
+                             this.audioCtx = null;
+                             this.analyser = null;
+                             const c = this.elements.canvas; const ctx = c.getContext('2d');
+                             ctx.clearRect(0, 0, c.width, c.height);
+                             if (!silent) this.setOverlay('Tap to start');
+                         }
+                     };
+                     window.musicVisualizer = mv;
+                     mv.init();
                     
                     // =================================================================
                     // CORRECTED WEBCAM WIDGET LOGIC
@@ -1423,11 +1905,12 @@
                 
                 (function setupBaseFeatures() {
                     const webcamToggleBtn = document.getElementById('webcam-toggle-btn');
-                    const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'];
+                    const DRAGGABLE_ELEMENT_IDS = ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'music-visualizer-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'];
                     const WIDGETS = {
                         stock: { el: document.getElementById('stock-widget'), toggle: document.getElementById('toggle-stock-widget'), default: true },
                         note: { el: document.getElementById('note-widget'), toggle: document.getElementById('toggle-note-widget'), default: false },
                         music: { el: document.getElementById('music-widget'), toggle: document.getElementById('toggle-music-widget'), default: false },
+                        musicVisualizer: { el: document.getElementById('music-visualizer-widget'), toggle: document.getElementById('toggle-music-visualizer-widget'), default: false },
                         gif: { el: document.getElementById('gif-widget'), toggle: document.getElementById('toggle-gif-widget'), default: false },
                         webcam: { el: document.getElementById('webcam-widget'), toggle: document.getElementById('toggle-webcam-widget'), default: false },
                     };
@@ -1447,6 +1930,9 @@
                                     window.webcamPlayer.populateDevices();
                                 }
                             }
+                            if (key === 'musicVisualizer' && !isVisible) {
+                                if (window.musicVisualizer) window.musicVisualizer.stop(true);
+                            }
 
                             widget.toggle.addEventListener('change', () => {
                                 const isChecked = widget.toggle.checked;
@@ -1460,6 +1946,9 @@
                                     } else {
                                         window.webcamPlayer.stop();
                                     }
+                                }
+                                if (key === 'musicVisualizer' && !isChecked) {
+                                    if (window.musicVisualizer) window.musicVisualizer.stop();
                                 }
                             });
                         }
@@ -1491,14 +1980,19 @@
                     const updateTime = () => { const n = new Date(); timeElems.h.textContent = String(n.getHours()).padStart(2, '0'); timeElems.m.textContent = String(n.getMinutes()).padStart(2, '0'); timeElems.d.textContent = n.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
                     const applyClockScale = (scale) => { const baseSizeVW = 15; const newSize = baseSizeVW * scale; timeElems.h.style.fontSize = `clamp(${newSize * 0.4}rem, ${newSize}vw, ${newSize * 0.8}rem)`; timeElems.m.style.fontSize = `clamp(${newSize * 0.4}rem, ${newSize}vw, ${newSize * 0.8}rem)`; clockScale = scale; };
                     
-                    const savePos = () => {
+                        const savePos = () => {
                         const p = {};
                         DRAGGABLE_ELEMENT_IDS.forEach(id => {
                             const e = document.getElementById(id);
                             if (e) {
                                 p[id] = { t: `${(e.offsetTop / lockScreen.clientHeight) * 100}%`, l: `${(e.offsetLeft / lockScreen.clientWidth) * 100}%` };
                                 if (id === 'clock') p[id].s = clockScale;
-                                if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget') { p[id].w = e.style.width; p[id].h = e.style.height; }
+                                    if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget' || id === 'music-visualizer-widget') {
+                                        // Allow sizes to exceed viewport, so read actual pixels if style is empty
+                                        const w = e.style.width || (e.offsetWidth + 'px');
+                                        const h = e.style.height || (e.offsetHeight + 'px');
+                                        p[id].w = w; p[id].h = h;
+                                    }
                             }
                         });
                         localStorage.setItem('lockscreenItemPositions_v5', JSON.stringify(p));
@@ -1513,7 +2007,7 @@
                                     e.style.top = pos.t; e.style.left = pos.l;
                                     e.style.transform = (id === 'clock' || id === 'stock-widget') ? 'none' : e.style.transform;
                                     if (id === 'clock' && pos.s) applyClockScale(pos.s);
-                                    if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget') { e.style.width = pos.w || e.style.width; e.style.height = pos.h || e.style.height; }
+                                    if (id === 'note-widget' || id === 'gif-widget' || id === 'webcam-widget' || id === 'music-visualizer-widget') { e.style.width = pos.w || e.style.width; e.style.height = pos.h || e.style.height; }
                                 }
                             });
                         }
@@ -1534,6 +2028,10 @@
                                 el.style.left = `${oldLeft - (deltaWidth / 2)}px`; el.style.top = `${oldTop - (deltaHeight / 2)}px`; return;
                             }
                             if (!isD) return; 
+                            // Prevent accidental dragging while resizing via mouse-hold + wheel on the music visualizer
+                            if (el.id === 'music-visualizer-widget' && window.musicVisualizer && window.musicVisualizer.isMouseHeld) {
+                                return;
+                            }
                             e.preventDefault(); 
                             hasMoved = true;
                             
@@ -1548,10 +2046,14 @@
                             
                             let nX = cX - oX, nY = cY - oY;
                             const sR = lockScreen;
-                            const maxX = sR.clientWidth - el.offsetWidth;
-                            const maxY = sR.clientHeight - el.offsetHeight;
-                            nX = Math.max(0, Math.min(nX, maxX));
-                            nY = Math.max(0, Math.min(nY, maxY));
+                            // Slightly relaxed bounds during drag to ease large-size placement
+                            const maxX = sR.clientWidth - el.offsetWidth + 100;
+                            const maxY = sR.clientHeight - el.offsetHeight + 100;
+                            const minX = -100;
+                            const minY = -100;
+                            nX = Math.max(minX, Math.min(nX, maxX));
+                            nY = Math.max(minY, Math.min(nY, maxY));
+                            // Allow moving outside screen bounds slightly for large widgets
                             el.style.left = `${nX}px`; 
                             el.style.top = `${nY}px`;
                             if(['clock', 'stock-widget'].indexOf(el.id) === -1) el.style.transform = 'none';
@@ -1905,7 +2407,7 @@
                     window.radioPlayer.reset();
                     window.webcamPlayer.stop();
                     document.getElementById('gif-display').src = '';
-                    ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
+                    ['clock', 'youtube-music-btn', 'youtube-btn', 'stock-widget', 'settings-btn', 'fun-stock-name-display', 'note-widget', 'music-widget', 'music-visualizer-widget', 'gif-widget', 'webcam-widget', 'webcam-toggle-btn'].forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.cssText = '';
                     });
